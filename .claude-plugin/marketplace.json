@@ -1,0 +1,15 @@
+{
+  "name": "riffsheet",
+  "owner": {"name": "Riffkit", "url": "https://github.com/riffkit"},
+  "description": "riffsheet: video breakdown for coding agents, shot by shot, on your own machine.",
+  "plugins": [
+    {
+      "name": "riffsheet",
+      "source": "./",
+      "description": "Your agent analyzes a short video shot by shot on your own machine: measured cuts, captions, loudness and word times, and why it holds a viewer, beat by beat.",
+      "license": "MIT",
+      "repository": "https://github.com/riffkit/riffsheet",
+      "keywords": ["video-breakdown", "video-analysis", "shot-detection", "short-video"]
+    }
+  ]
+}

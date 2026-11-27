@@ -1,0 +1,41 @@
+rs transcribe outfit-rules.mp4 --out T.json
+rs scan outfit-rules.mp4 --out scan --transcript T.json
+rs build scan
+rs text scan --box 0.02,0.40,0.98,0.475 --name cap
+rs text scan --box 0.30,0.32,0.70,0.38 --name top
+rs element scan --box 0.38,0.44,0.62,0.58 --at 2.2 --name check1
+rs element scan --box 0.38,0.44,0.62,0.58 --at 5.9 --name check2
+rs element scan --box 0.38,0.44,0.62,0.58 --at 7.8 --name check3
+rs mouth scan --box 0.38,0.17,0.66,0.30 --words 0-16
+rs frames scan --from 0 --to 8.04 --every 4
+rs frames scan --from 2.25 --to 2.5
+rs frames scan --from 4.0 --to 4.25
+rs frames scan --from 6.05 --to 6.3
+rs color scan --at 1.0 --box 0.44,0.48,0.56,0.58 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 1.0 --box 0.42,0.72,0.58,0.85 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 3.0 --box 0.26,0.66,0.34,0.72 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 3.0 --box 0.45,0.48,0.55,0.55 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 4.5 --box 0.44,0.52,0.56,0.60 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 4.5 --box 0.42,0.72,0.58,0.85 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 7.0 --box 0.40,0.72,0.60,0.78 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 7.0 --box 0.42,0.88,0.58,0.97 --ref 0.05,0.05,0.20,0.20
+rs element scan --box 0.40,0.455,0.60,0.57 --at 2.1 --name check1
+rs zoom scan --at 1.2 --box 0.15,0.05,0.85,0.62
+rs zoom scan --at 1.2 --box 0.10,0.55,0.90,1.00
+rs zoom scan --at 3.2 --box 0.10,0.05,0.90,0.75
+rs zoom scan --at 4.8 --box 0.15,0.05,0.85,0.62
+rs zoom scan --at 4.8 --box 0.10,0.55,0.90,1.00
+rs zoom scan --at 7.0 --box 0.10,0.05,0.90,0.75
+rs zoom scan --at 7.0 --box 0.10,0.60,0.90,1.00
+rs zoom scan --at 0.5 --box 0.00,0.00,1.00,1.00
+rs color scan --at 3.2 --box 0.36,0.40,0.44,0.46 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 3.2 --box 0.64,0.60,0.72,0.68 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 0.5 --box 0.02,0.62,0.12,0.70 --ref 0.05,0.05,0.20,0.20
+rs zoom scan --at 3.2 --box 0.10,0.60,0.90,1.00
+rs color scan --at 3.2 --box 0.42,0.80,0.58,0.92 --ref 0.05,0.05,0.20,0.20
+rs build scan --judgment judgment.json --out out
+rs color scan --at 7.0 --box 0.40,0.50,0.60,0.62 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 7.0 --box 0.40,0.61,0.58,0.64 --ref 0.05,0.05,0.20,0.20
+rs color scan --at 7.0 --box 0.42,0.42,0.58,0.455 --ref 0.05,0.05,0.20,0.20
+rs build scan --judgment judgment.json --out out
+rs build scan --judgment judgment.json --out out

@@ -1,0 +1,1423 @@
+{
+ "format_version": 1,
+ "prose": "[00:00.0-00:02.4] [image:protagonist] stands facing the lens at the center of the frame in a static, locked eye-level medium-wide shot that runs from just above her head to her knees, her figure taking about a third of the frame width. She wears a fitted dark brown long-sleeve top with a wide square neckline and a gold curb chain necklace, tucked into high-waisted wide-leg mid-blue jeans with a silver button. She stands in a bright room with white walls, a light oak plank floor, a pale rounded bouclé pouf behind her on the left and a white-framed glass door with a silver handle at the right edge; low sun from the right lays hard-edged warm patches on the left wall, and the image is sharp, natural and phone-like. In direct address, eyes on the lens and smiling with her mouth wide open, she lifts both open palms to shoulder height between 00:00.2 and 00:00.8, then drops her arms back to her sides by 00:01.2, a moderate tempo. [image:protagonist] calls out on camera, unhurried, eyebrows raised and mouth wide, [voice:vs1]; the loudest point of the clip, -10 dB at 00:00.4, falls under this word. [image:protagonist] goes on on camera at a measured pace, arms now still at her sides and a broad smile spreading as she finishes, [voice:vs2]. A continuous sound sits under the voice: in 3 of 6 pauses between words the level stays within 20 dB of the -22 dB speech median. After her last word the level drops to -44 dB at 00:02.4 with no word under it, -16 dB in 0.3 s, as the shot ends.\n\n[00:02.4-00:04.1] At 00:02.375 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) changes her clothes while the static, locked eye-level medium-wide framing and the place hold: [image:protagonist] stands at the center, head to knees, about a third of the frame width. She now wears an oversized white crew-neck sweatshirt printed with one large photographic red apple across the front over mid-blue skinny jeans. Behind her are the same white walls lit by low sun from the right, the pale bouclé pouf at the left, the light oak floor and the white-framed glass door at the right edge. Her expression turns disapproving: brows drawn together, lips rounded, eyes on the lens in direct address. From 00:02.4 she swings her right forearm up and raises one index finger beside her shoulder, and keeps the finger raised to 00:04.08, tipping it left and right, a slow tempo. SOUND AT THE CUTS measures no sound event on the cut at 00:02.375; the nearest is a drop at 00:02.25, 0.12 s before. [image:protagonist] says on camera at a measured pace, frowning with the finger raised, [voice:vs3]. Just before the next cut, [image:protagonist] starts the next line on camera, unhurried, [voice:vs4]; the level reaches its lowest point of the clip, -46 dB at 00:04.1, under that word.\n\n[00:04.1-00:06.2] At 00:04.125 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) changes her clothes again in the same static, locked eye-level medium-wide framing: [image:protagonist] stands at the center, head to knees, about a third of the frame width. She wears a fitted white ribbed sleeveless top with a high round neck, the gold curb chain necklace and a gold chain bracelet on her left wrist, tucked into high-waisted fitted mid-blue jeans with two square patch pockets on the front and a silver button. The same white-walled room surrounds her: the pale bouclé pouf at the left, the light oak floor, the white-framed glass door at the right edge, low sun from the right. Still mid-line, she smiles with her mouth wide open, eyes on the lens in direct address; she raises both fists to chest height with thumbs out at the cut, then from 00:04.5 points both index fingers down toward her waist and keeps pointing to 00:06.1, a moderate tempo. The cut lands on no sound event; the nearest is a rise at 00:04.25, 0.12 s after. [image:protagonist] finishes the line on camera, unhurried, ending on a wide smile with teeth showing. After her last word comes the quietest stretch with no word, -44 dB from 00:05.9 to 00:06.2, and the deepest drop, to -46 dB at 00:06.1, -23 dB in 0.3 s.\n\n[00:06.2-00:08.0] At 00:06.167 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) brings the last change of clothes in the same static, locked eye-level medium-wide framing: [image:protagonist] stands at the center, head to knees, about a third of the frame width. She wears an oversized light gray crew-neck sweatshirt with a busy multicolor illustrated print in blue, yellow and orange and large yellow-to-orange block letters across the front, over loose light-wash blue straight-leg jeans. The same white-walled room holds behind her: the pale bouclé pouf at the left, the light oak floor, the white-framed glass door at the right edge, low sun from the right. The SOUND AT THE CUTS line puts the nearest sound event to this cut at a drop at 00:06.02, 0.15 s before. Eyes on the lens in direct address, mouth open in a wide smile, she has both thumbs up beside her chest from the cut, lifts them toward her shoulders around 00:07.3 and keeps them up to the end, a moderate tempo. [image:protagonist] says on camera at a measured pace, beaming, [voice:vs5]. In the last half second the level falls to -43 dB.",
+ "audio": {
+  "voice_segments": [
+   {
+    "id": "vs1",
+    "time_range": [
+     0.0,
+     0.7
+    ],
+    "text": "Acuérdate,",
+    "mode": "on_camera_dialogue",
+    "speaker": "protagonist",
+    "_src": {
+     "time_range": "measured",
+     "text": "measured"
+    },
+    "_pace": {
+     "unit": "words",
+     "count": 1,
+     "per_s": 1.43,
+     "band": "unhurried",
+     "longest_gap_s": 0.0,
+     "pauses_over_0_4s": [],
+     "trend": null
+    }
+   },
+   {
+    "id": "vs2",
+    "time_range": [
+     0.9,
+     2.18
+    ],
+    "text": "ajustado con holgado, sí,",
+    "mode": "on_camera_dialogue",
+    "speaker": "protagonist",
+    "_src": {
+     "time_range": "measured",
+     "text": "measured"
+    },
+    "_pace": {
+     "unit": "words",
+     "count": 4,
+     "per_s": 3.12,
+     "band": "measured",
+     "longest_gap_s": 0.2,
+     "pauses_over_0_4s": [],
+     "trend": null
+    },
+    "_notes": [
+     "transcript 'olado,' -> 'holgado,' (seen in a word-for-word caption)"
+    ]
+   },
+   {
+    "id": "vs3",
+    "time_range": [
+     2.58,
+     3.96
+    ],
+    "text": "holgado con ajustado, no,",
+    "mode": "on_camera_dialogue",
+    "speaker": "protagonist",
+    "_src": {
+     "time_range": "measured",
+     "text": "measured"
+    },
+    "_pace": {
+     "unit": "words",
+     "count": 4,
+     "per_s": 2.9,
+     "band": "measured",
+     "longest_gap_s": 0.14,
+     "pauses_over_0_4s": [],
+     "trend": null
+    },
+    "_notes": [
+     "transcript 'olvado' -> 'holgado' (seen in a word-for-word caption)"
+    ]
+   },
+   {
+    "id": "vs4",
+    "time_range": [
+     4.1,
+     5.78
+    ],
+    "text": "ajustado con ajustado, sí,",
+    "mode": "on_camera_dialogue",
+    "speaker": "protagonist",
+    "_src": {
+     "time_range": "measured",
+     "text": "measured"
+    },
+    "_pace": {
+     "unit": "words",
+     "count": 4,
+     "per_s": 2.38,
+     "band": "unhurried",
+     "longest_gap_s": 0.04,
+     "pauses_over_0_4s": [],
+     "trend": null
+    },
+    "_notes": [
+     "line runs across cut(s) at 4.125"
+    ]
+   },
+   {
+    "id": "vs5",
+    "time_range": [
+     6.24,
+     7.78
+    ],
+    "text": "holgado con holgado, sí.",
+    "mode": "on_camera_dialogue",
+    "speaker": "protagonist",
+    "_src": {
+     "time_range": "measured",
+     "text": "measured"
+    },
+    "_pace": {
+     "unit": "words",
+     "count": 4,
+     "per_s": 2.6,
+     "band": "measured",
+     "longest_gap_s": 0.28,
+     "pauses_over_0_4s": [],
+     "trend": null
+    },
+    "_notes": [
+     "transcript 'olvado' -> 'holgado' (seen in a word-for-word caption)",
+     "transcript 'olado,' -> 'holgado,' (seen in a word-for-word caption)"
+    ]
+   }
+  ]
+ },
+ "scene_entities": [
+  {
+   "id": "protagonist",
+   "kind": "person",
+   "semantic": "A young woman who faces the lens in the same sunlit place in all four shots and changes clothes at every cut, ruling on each fit combination",
+   "time_range": [
+    0.0,
+    8.042
+   ],
+   "attributes": {
+    "role": "protagonist",
+    "gender": "female",
+    "age_range": "young"
+   },
+   "params": {},
+   "_src": {
+    "attributes.age_range": "inferred"
+   }
+  },
+  {
+   "id": "caption_hook",
+   "kind": "subtitle",
+   "semantic": "Persistent header: the opening spoken word, kept up through the whole video above each rule",
+   "time_range": [
+    0.0,
+    8.042
+   ],
+   "attributes": {},
+   "params": {
+    "text": "acuérdate...",
+    "position_y_ratio": 0.369,
+    "position_x_ratio": 0.462,
+    "approximate_size": "very_small",
+    "cue_max_words": 1,
+    "voice_anchor": "vs1"
+   },
+   "_src": {
+    "time_range": "measured",
+    "params.cue_max_words": "measured",
+    "params.position_y_ratio": "measured",
+    "params.position_x_ratio": "measured",
+    "params.approximate_size": "measured",
+    "params.color": "seen",
+    "params.outline_color": "seen"
+   },
+   "_measured_style": {
+    "states_measured": 3,
+    "states": 16,
+    "fill": "#3C2011",
+    "fill_agree": 1.0,
+    "frames_measured_share": 0.11,
+    "center": [
+     0.462,
+     0.369
+    ],
+    "box": [
+     0.319,
+     0.36,
+     0.604,
+     0.378
+    ],
+    "row_px_1080w": 16,
+    "rows": 2
+   },
+   "_notes": [
+    "color: measured #3C2011, set to None by reading (Every text image shows plain white letters with a faint dark shadow; the measured brown fills come from the hair and necklace behind the thin letters)"
+   ]
+  },
+  {
+   "id": "caption_vs2",
+   "kind": "subtitle",
+   "semantic": "Rule label: transcribes the fit pair of vs2 (without the spoken verdict)",
+   "time_range": [
+    0.0,
+    2.375
+   ],
+   "attributes": {},
+   "params": {
+    "text": "ajustado con holgado",
+    "cue_max_words": 3,
+    "voice_anchor": "vs2",
+    "approximate_size": "small",
+    "position_y_ratio": 0.455,
+    "position_x_ratio": 0.5
+   },
+   "_src": {
+    "time_range": "measured",
+    "params.cue_max_words": "measured",
+    "params.color": "seen",
+    "params.approximate_size": "seen",
+    "params.position_y_ratio": "seen",
+    "params.position_x_ratio": "seen"
+   },
+   "_measured_style": {
+    "states_measured": 0,
+    "states": 4,
+    "why": [
+     "fill #77C682 (from two edges) has no other state to agree with: it may be the picture behind",
+     "fill #89524D (from two edges) has no other state to agree with: it may be the picture behind",
+     "no layer pixels",
+     "picture behind changed when it left"
+    ]
+   },
+   "_notes": [
+    "style not measured: fill #77C682 (from two edges) has no other state to agree with: it may be the picture behind; fill #89524D (from two edges) has no other state to agree with: it may be the picture behind; no layer pixels; picture behind changed when it left"
+   ]
+  },
+  {
+   "id": "caption_vs3",
+   "kind": "subtitle",
+   "semantic": "Rule label: transcribes the fit pair of vs3 (without the spoken verdict)",
+   "time_range": [
+    2.542,
+    4.125
+   ],
+   "attributes": {},
+   "params": {
+    "text": "holgado con ajustado",
+    "cue_max_words": 3,
+    "voice_anchor": "vs3",
+    "approximate_size": "small",
+    "position_y_ratio": 0.455,
+    "position_x_ratio": 0.5
+   },
+   "_src": {
+    "time_range": "measured",
+    "params.cue_max_words": "measured",
+    "params.color": "seen",
+    "params.approximate_size": "seen",
+    "params.position_y_ratio": "seen",
+    "params.position_x_ratio": "seen"
+   },
+   "_measured_style": {
+    "states_measured": 0,
+    "states": 2,
+    "why": [
+     "fill #C78877 (from two edges) has no other state to agree with: it may be the picture behind",
+     "picture behind changed when it appeared; picture behind changed when it left"
+    ]
+   },
+   "_notes": [
+    "style not measured: fill #C78877 (from two edges) has no other state to agree with: it may be the picture behind; picture behind changed when it appeared; picture behind changed when it left"
+   ]
+  },
+  {
+   "id": "caption_vs4",
+   "kind": "subtitle",
+   "semantic": "Rule label: transcribes the fit pair of vs4 (without the spoken verdict)",
+   "time_range": [
+    4.208,
+    5.917
+   ],
+   "attributes": {},
+   "params": {
+    "text": "ajustado con ajustado",
+    "cue_max_words": 3,
+    "voice_anchor": "vs4",
+    "approximate_size": "small",
+    "position_y_ratio": 0.455,
+    "position_x_ratio": 0.5
+   },
+   "_src": {
+    "time_range": "measured",
+    "params.cue_max_words": "measured",
+    "params.color": "seen",
+    "params.approximate_size": "seen",
+    "params.position_y_ratio": "seen",
+    "params.position_x_ratio": "seen"
+   },
+   "_measured_style": {
+    "states_measured": 0,
+    "states": 1,
+    "why": [
+     "fill #FCFAF6 (from one edge) has no other state to agree with: it may be the picture behind"
+    ]
+   },
+   "_notes": [
+    "style not measured: fill #FCFAF6 (from one edge) has no other state to agree with: it may be the picture behind"
+   ]
+  },
+  {
+   "id": "caption_vs5",
+   "kind": "subtitle",
+   "semantic": "Rule label: transcribes the fit pair of vs5 (without the spoken verdict)",
+   "time_range": [
+    6.167,
+    8.042
+   ],
+   "attributes": {},
+   "params": {
+    "text": "holgado con holgado",
+    "cue_max_words": 3,
+    "voice_anchor": "vs5",
+    "approximate_size": "small",
+    "position_y_ratio": 0.455,
+    "position_x_ratio": 0.5
+   },
+   "_src": {
+    "time_range": "measured",
+    "params.cue_max_words": "measured",
+    "params.color": "seen",
+    "params.approximate_size": "seen",
+    "params.position_y_ratio": "seen",
+    "params.position_x_ratio": "seen"
+   },
+   "_measured_style": {
+    "states_measured": 0,
+    "states": 1,
+    "why": [
+     "picture behind changed when it appeared"
+    ]
+   },
+   "_notes": [
+    "style not measured: picture behind changed when it appeared"
+   ]
+  },
+  {
+   "id": "check_yes_1",
+   "kind": "graphic",
+   "semantic": "Approval stamp for the first rule, popping on as the spoken yes arrives",
+   "time_range": [
+    1.708,
+    2.375
+   ],
+   "attributes": {},
+   "params": {
+    "description": "A green rounded-square emoji tile with a white check mark, centered on the chest just under the rule label; pops on, holds, leaves at the cut",
+    "x_ratio": 0.4069,
+    "y_ratio": 0.4602,
+    "width_ratio": 0.185,
+    "height_ratio": 0.104,
+    "split": false
+   },
+   "_src": {
+    "time_range": "measured",
+    "params.x_ratio": "measured",
+    "params.y_ratio": "measured",
+    "params.width_ratio": "measured",
+    "params.height_ratio": "measured"
+   }
+  },
+  {
+   "id": "check_yes_2",
+   "kind": "graphic",
+   "semantic": "Approval stamp for the third rule; stays up after the rule label leaves until the cut",
+   "time_range": [
+    5.333,
+    6.167
+   ],
+   "attributes": {},
+   "params": {
+    "description": "A green rounded-square emoji tile with a white check mark, centered on the chest just under the rule label; pops on, holds, leaves at the cut",
+    "x_ratio": 0.4083,
+    "y_ratio": 0.4609,
+    "width_ratio": 0.182,
+    "height_ratio": 0.101,
+    "split": false
+   },
+   "_src": {
+    "time_range": "measured",
+    "params.x_ratio": "measured",
+    "params.y_ratio": "measured",
+    "params.width_ratio": "measured",
+    "params.height_ratio": "measured"
+   }
+  },
+  {
+   "id": "check_yes_3",
+   "kind": "graphic",
+   "semantic": "Approval stamp for the last rule, held to the end",
+   "time_range": [
+    7.083,
+    8.042
+   ],
+   "attributes": {},
+   "params": {
+    "description": "A green rounded-square emoji tile with a white check mark, centered on the chest just under the rule label; pops on and holds to the end",
+    "x_ratio": 0.4111,
+    "y_ratio": 0.4594,
+    "width_ratio": 0.175,
+    "height_ratio": 0.103,
+    "split": false
+   },
+   "_src": {
+    "time_range": "measured",
+    "params.x_ratio": "measured",
+    "params.y_ratio": "measured",
+    "params.width_ratio": "measured",
+    "params.height_ratio": "measured"
+   }
+  }
+ ],
+ "slots": [
+  {
+   "id": "s1",
+   "time_range": [
+    0.0,
+    2.375
+   ],
+   "formula": {
+    "funnel_stage": "attention",
+    "function": "Announces in one spoken word that a short rule set to memorize is coming, then states the first rule and stamps it approved on a body that shows it.",
+    "mechanism": "A memory cue sets up a checklist whose remaining items the viewer cannot predict, so leaving means missing the rest of the rule.",
+    "viewer_state_before": "Knows nothing; sees a person facing the lens in a styled outfit.",
+    "viewer_state_after": "Knows the format is a pair-of-fits rule with a yes or no verdict and has seen one approved example; waits for the other combinations.",
+    "meaning_contract": {
+     "attention_contract": "You will get a complete, simple rule for combining fits.",
+     "payoff_meaning": "The first combination is correct, shown on a real outfit.",
+     "proof_surface": "The outfit on screen is the example for the rule label and the approval stamp."
+    },
+    "constraint": "Does the first spoken word promise a rule to remember, and does the first combination appear on the body with its verdict within about two seconds?",
+    "sensory_channel": "mixed",
+    "retention_anchor": "The header stays up the whole time, telling the viewer the list is not finished.",
+    "linguistic_craft": "A one-word imperative hook followed by a terse formula: item, with, item, verdict."
+   },
+   "_src": {
+    "time_range": "inferred",
+    "formula": "inferred"
+   }
+  },
+  {
+   "id": "s2",
+   "time_range": [
+    2.375,
+    6.167
+   ],
+   "formula": {
+    "funnel_stage": "interest",
+    "function": "Swaps the order of the pair and gives the first refusal, then gives an approval the viewer may not expect, so each verdict has to be checked against the outfit.",
+    "mechanism": "Mirrored pairs with opposite verdicts make the viewer test a guess against each outfit, and a refusal next to approvals breaks the pattern and resets attention.",
+    "viewer_state_before": "Has one approved combination and expects more approvals.",
+    "viewer_state_after": "Has seen one refused and two approved combinations and is completing the grid in their head, waiting for the last cell.",
+    "meaning_contract": {
+     "attention_contract": "Each new outfit is one more cell of the same rule.",
+     "payoff_meaning": "Order matters: which half is fitted changes the verdict.",
+     "proof_surface": "A disapproving face and raised finger for the refusal, pointing at the garment for the approval."
+    },
+    "constraint": "Does each outfit change at a cut together with its rule label, and does at least one verdict break the run of approvals with a visibly different reaction?",
+    "sensory_channel": "visual",
+    "retention_anchor": "One combination of the four is still missing.",
+    "linguistic_craft": "The same three-word frame repeated with only the two adjectives swapped, so the swap itself carries the meaning."
+   },
+   "_src": {
+    "time_range": "inferred",
+    "formula": "inferred",
+    "formula.whether the spoken no sounds emphatic": "cannot_judge_locally"
+   }
+  },
+  {
+   "id": "s3",
+   "time_range": [
+    6.167,
+    8.042
+   ],
+   "formula": {
+    "funnel_stage": "payoff",
+    "function": "Fills the last cell of the grid with an approval and the most enthusiastic gesture, completing a rule the viewer can now repeat.",
+    "mechanism": "Closing the set of all combinations delivers the promised complete rule, and ending on the clearest approval leaves a saveable takeaway.",
+    "viewer_state_before": "Waits for the last remaining combination and its verdict.",
+    "viewer_state_after": "Holds all four combinations with their verdicts, three yes and one no.",
+    "meaning_contract": {
+     "attention_contract": "The list ends when every combination has been ruled on.",
+     "payoff_meaning": "Only one combination is wrong; the rest are allowed.",
+     "proof_surface": "The final outfit with the approval stamp and two raised thumbs."
+    },
+    "constraint": "Does the last shot complete every combination promised by the format, with a verdict as clear as the first?",
+    "sensory_channel": "visual",
+    "retention_anchor": null,
+    "linguistic_craft": "The last item repeats the same adjective twice, closing the pattern."
+   },
+   "_src": {
+    "time_range": "inferred",
+    "formula": "inferred"
+   }
+  }
+ ],
+ "metadata": {
+  "duration_seconds": 8.042,
+  "video_format": "single_shot",
+  "language": "es",
+  "speaking_mode": "on_camera",
+  "_src": {
+   "duration_seconds": "measured",
+   "speaking_mode": "measured",
+   "video_format": "seen",
+   "language": "seen"
+  }
+ },
+ "_prose_segments": [
+  {
+   "window": [
+    0.0,
+    2.375
+   ],
+   "text": "[00:00.0-00:02.4] [image:protagonist] stands facing the lens at the center of the frame in a static, locked eye-level medium-wide shot that runs from just above her head to her knees, her figure taking about a third of the frame width. She wears a fitted dark brown long-sleeve top with a wide square neckline and a gold curb chain necklace, tucked into high-waisted wide-leg mid-blue jeans with a silver button. She stands in a bright room with white walls, a light oak plank floor, a pale rounded bouclé pouf behind her on the left and a white-framed glass door with a silver handle at the right edge; low sun from the right lays hard-edged warm patches on the left wall, and the image is sharp, natural and phone-like. In direct address, eyes on the lens and smiling with her mouth wide open, she lifts both open palms to shoulder height between 00:00.2 and 00:00.8, then drops her arms back to her sides by 00:01.2, a moderate tempo. [image:protagonist] calls out on camera, unhurried, eyebrows raised and mouth wide, [voice:vs1]; the loudest point of the clip, -10 dB at 00:00.4, falls under this word. [image:protagonist] goes on on camera at a measured pace, arms now still at her sides and a broad smile spreading as she finishes, [voice:vs2]. A continuous sound sits under the voice: in 3 of 6 pauses between words the level stays within 20 dB of the -22 dB speech median. After her last word the level drops to -44 dB at 00:02.4 with no word under it, -16 dB in 0.3 s, as the shot ends.",
+   "claims": {
+    "cannot_judge_locally": [
+     "whether the continuous sound under the voice is music or room ambience",
+     "tone and energy of the voice"
+    ],
+    "measured": [
+     "cut at 00:02.4",
+     "cliff_rise -16.1 dB at 00:00.2",
+     "cliff_drop -39.8 dB at 00:00.8",
+     "cliff_rise -14.4 dB at 00:01.2"
+    ]
+   }
+  },
+  {
+   "window": [
+    2.375,
+    4.125
+   ],
+   "text": "[00:02.4-00:04.1] At 00:02.375 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) changes her clothes while the static, locked eye-level medium-wide framing and the place hold: [image:protagonist] stands at the center, head to knees, about a third of the frame width. She now wears an oversized white crew-neck sweatshirt printed with one large photographic red apple across the front over mid-blue skinny jeans. Behind her are the same white walls lit by low sun from the right, the pale bouclé pouf at the left, the light oak floor and the white-framed glass door at the right edge. Her expression turns disapproving: brows drawn together, lips rounded, eyes on the lens in direct address. From 00:02.4 she swings her right forearm up and raises one index finger beside her shoulder, and keeps the finger raised to 00:04.08, tipping it left and right, a slow tempo. SOUND AT THE CUTS measures no sound event on the cut at 00:02.375; the nearest is a drop at 00:02.25, 0.12 s before. [image:protagonist] says on camera at a measured pace, frowning with the finger raised, [voice:vs3]. Just before the next cut, [image:protagonist] starts the next line on camera, unhurried, [voice:vs4]; the level reaches its lowest point of the clip, -46 dB at 00:04.1, under that word.",
+   "claims": {
+    "cannot_judge_locally": [
+     "tone of the spoken no"
+    ],
+    "measured": [
+     "cut at 00:02.4",
+     "cut at 00:04.1",
+     "cliff_drop -44.5 dB at 00:02.4",
+     "cliff_drop -46.0 dB at 00:04.1"
+    ]
+   }
+  },
+  {
+   "window": [
+    4.125,
+    6.167
+   ],
+   "text": "[00:04.1-00:06.2] At 00:04.125 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) changes her clothes again in the same static, locked eye-level medium-wide framing: [image:protagonist] stands at the center, head to knees, about a third of the frame width. She wears a fitted white ribbed sleeveless top with a high round neck, the gold curb chain necklace and a gold chain bracelet on her left wrist, tucked into high-waisted fitted mid-blue jeans with two square patch pockets on the front and a silver button. The same white-walled room surrounds her: the pale bouclé pouf at the left, the light oak floor, the white-framed glass door at the right edge, low sun from the right. Still mid-line, she smiles with her mouth wide open, eyes on the lens in direct address; she raises both fists to chest height with thumbs out at the cut, then from 00:04.5 points both index fingers down toward her waist and keeps pointing to 00:06.1, a moderate tempo. The cut lands on no sound event; the nearest is a rise at 00:04.25, 0.12 s after. [image:protagonist] finishes the line on camera, unhurried, ending on a wide smile with teeth showing. After her last word comes the quietest stretch with no word, -44 dB from 00:05.9 to 00:06.2, and the deepest drop, to -46 dB at 00:06.1, -23 dB in 0.3 s.",
+   "claims": {
+    "measured": [
+     "cut at 00:04.1",
+     "cut at 00:06.2",
+     "peak -13.5 dB at 00:04.5",
+     "cliff_drop -45.5 dB at 00:06.1"
+    ]
+   }
+  },
+  {
+   "window": [
+    6.167,
+    8.042
+   ],
+   "text": "[00:06.2-00:08.0] At 00:06.167 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) brings the last change of clothes in the same static, locked eye-level medium-wide framing: [image:protagonist] stands at the center, head to knees, about a third of the frame width. She wears an oversized light gray crew-neck sweatshirt with a busy multicolor illustrated print in blue, yellow and orange and large yellow-to-orange block letters across the front, over loose light-wash blue straight-leg jeans. The same white-walled room holds behind her: the pale bouclé pouf at the left, the light oak floor, the white-framed glass door at the right edge, low sun from the right. The SOUND AT THE CUTS line puts the nearest sound event to this cut at a drop at 00:06.02, 0.15 s before. Eyes on the lens in direct address, mouth open in a wide smile, she has both thumbs up beside her chest from the cut, lifts them toward her shoulders around 00:07.3 and keeps them up to the end, a moderate tempo. [image:protagonist] says on camera at a measured pace, beaming, [voice:vs5]. In the last half second the level falls to -43 dB.",
+   "claims": {
+    "uncertain": [
+     "the sweatshirt print's lettering is only partly legible: a blue arc at the top is unreadable and the large yellow-orange letters look like CEIANID"
+    ],
+    "measured": [
+     "cut at 00:06.2",
+     "cliff_drop -35.4 dB at 00:07.3"
+    ]
+   }
+  }
+ ],
+ "_local": {
+  "method": "riffsheet build",
+  "scan": "../scan",
+  "tags": "untagged = seen; _src lists measured fields and exceptions only",
+  "cuts": [
+   2.375,
+   4.125,
+   6.167
+  ],
+  "non_cut_changes": [],
+  "camera_still_share": {
+   "S1": 0.62,
+   "S2": 0.68,
+   "S3": 0.71,
+   "S4": 0.61
+  },
+  "sound_at_picture": {
+   "tolerance_s": 0.052,
+   "peaks_and_rises": 11,
+   "cuts": {
+    "summary": "0 of 3 cuts land on a loudness peak or rise (within 0.052 s); about 0.4 would by chance, with 11 peaks and rises in 8.0 s",
+    "by_chance": 0.43,
+    "changes": [
+     {
+      "id": "E1",
+      "kind": "cut",
+      "span": [
+       2.375,
+       2.375
+      ],
+      "on": [],
+      "nearest": {
+       "type": "cliff_drop",
+       "t": 2.25,
+       "dt": -0.12,
+       "db": -44.5
+      }
+     },
+     {
+      "id": "E2",
+      "kind": "cut",
+      "span": [
+       4.125,
+       4.125
+      ],
+      "on": [],
+      "nearest": {
+       "type": "cliff_rise",
+       "t": 4.25,
+       "dt": 0.12,
+       "db": -20.5
+      }
+     },
+     {
+      "id": "E3",
+      "kind": "cut",
+      "span": [
+       6.167,
+       6.167
+      ],
+      "on": [],
+      "nearest": {
+       "type": "cliff_drop",
+       "t": 6.02,
+       "dt": -0.15,
+       "db": -45.5
+      }
+     }
+    ]
+   },
+   "captions": {
+    "summary": "4 of 5 caption appearances land on a loudness peak or rise (within 0.052 s); about 0.7 would by chance, with 11 peaks and rises in 8.0 s",
+    "by_chance": 0.71,
+    "changes": [
+     {
+      "id": "caption_hook",
+      "kind": "caption",
+      "span": [
+       0.0,
+       0.0
+      ],
+      "on": [
+       {
+        "type": "cliff_rise",
+        "t": 0.05,
+        "dt": 0.05,
+        "db": -16.1
+       }
+      ],
+      "nearest": null
+     },
+     {
+      "id": "caption_vs2",
+      "kind": "caption",
+      "span": [
+       0.0,
+       0.0
+      ],
+      "on": [
+       {
+        "type": "cliff_rise",
+        "t": 0.05,
+        "dt": 0.05,
+        "db": -16.1
+       }
+      ],
+      "nearest": null
+     },
+     {
+      "id": "caption_vs3",
+      "kind": "caption",
+      "span": [
+       2.542,
+       2.542
+      ],
+      "on": [
+       {
+        "type": "cliff_rise",
+        "t": 2.56,
+        "dt": 0.02,
+        "db": -12.5
+       }
+      ],
+      "nearest": null
+     },
+     {
+      "id": "caption_vs4",
+      "kind": "caption",
+      "span": [
+       4.208,
+       4.208
+      ],
+      "on": [
+       {
+        "type": "cliff_rise",
+        "t": 4.25,
+        "dt": 0.04,
+        "db": -20.5
+       }
+      ],
+      "nearest": null
+     },
+     {
+      "id": "caption_vs5",
+      "kind": "caption",
+      "span": [
+       6.167,
+       6.167
+      ],
+      "on": [],
+      "nearest": {
+       "type": "cliff_drop",
+       "t": 6.02,
+       "dt": -0.15,
+       "db": -45.5
+      }
+     }
+    ]
+   }
+  },
+  "dropped_as_music": [],
+  "cannot_judge_locally": [
+   "pitch, accent and energy of the voice",
+   "whether the continuous sound under the voice is music"
+  ],
+  "tool_gaps": [
+   "F1 (0.78,0.02,1.00,1.00) is the white door frame at the right edge and F3 (0.02,0.80,0.18,0.86) the edge of the pouf and floor at the left: no lettering or drawn shape on any overview cell, so `text` was not run on them.",
+   "R1 (0.02,0.10,0.98,1.00) covers the whole figure; the two captions inside it were read with tighter boxes (cap, top) instead.",
+   "The first element command on the first check mark (box 0.38,0.44,0.62,0.58) caught the caption too; a tighter box measured it."
+  ],
+  "followups": [
+   {
+    "cmd": "text",
+    "json": "look/cap.json",
+    "window": null,
+    "box": null,
+    "frames": null
+   },
+   {
+    "cmd": "text",
+    "json": "look/top.json",
+    "window": null,
+    "box": null,
+    "frames": null
+   },
+   {
+    "cmd": "element",
+    "json": "look/check1.json",
+    "window": null,
+    "box": [
+     0.38,
+     0.44,
+     0.62,
+     0.58
+    ],
+    "frames": [
+     53
+    ]
+   },
+   {
+    "cmd": "element",
+    "json": "look/check2.json",
+    "window": null,
+    "box": [
+     0.38,
+     0.44,
+     0.62,
+     0.58
+    ],
+    "frames": [
+     142
+    ]
+   },
+   {
+    "cmd": "element",
+    "json": "look/check3.json",
+    "window": null,
+    "box": [
+     0.38,
+     0.44,
+     0.62,
+     0.58
+    ],
+    "frames": [
+     187
+    ]
+   },
+   {
+    "cmd": "mouth",
+    "json": null,
+    "window": [
+     -0.15,
+     7.930000000000001
+    ],
+    "box": [
+     0.38,
+     0.17,
+     0.66,
+     0.3
+    ],
+    "frames": null
+   },
+   {
+    "cmd": "frames",
+    "json": null,
+    "window": [
+     0.0,
+     8.04
+    ],
+    "box": null,
+    "frames": null
+   },
+   {
+    "cmd": "frames",
+    "json": null,
+    "window": [
+     2.25,
+     2.5
+    ],
+    "box": null,
+    "frames": null
+   },
+   {
+    "cmd": "frames",
+    "json": null,
+    "window": [
+     4.0,
+     4.25
+    ],
+    "box": null,
+    "frames": null
+   },
+   {
+    "cmd": "frames",
+    "json": null,
+    "window": [
+     6.05,
+     6.3
+    ],
+    "box": null,
+    "frames": null
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.44,
+     0.48,
+     0.56,
+     0.58
+    ],
+    "frames": [
+     24
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.42,
+     0.72,
+     0.58,
+     0.85
+    ],
+    "frames": [
+     24
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.26,
+     0.66,
+     0.34,
+     0.72
+    ],
+    "frames": [
+     72
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.45,
+     0.48,
+     0.55,
+     0.55
+    ],
+    "frames": [
+     72
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.44,
+     0.52,
+     0.56,
+     0.6
+    ],
+    "frames": [
+     108
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.42,
+     0.72,
+     0.58,
+     0.85
+    ],
+    "frames": [
+     108
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.4,
+     0.72,
+     0.6,
+     0.78
+    ],
+    "frames": [
+     168
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.42,
+     0.88,
+     0.58,
+     0.97
+    ],
+    "frames": [
+     168
+    ]
+   },
+   {
+    "cmd": "element",
+    "json": "look/check1.json",
+    "window": null,
+    "box": [
+     0.4,
+     0.455,
+     0.6,
+     0.57
+    ],
+    "frames": [
+     50
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.15,
+     0.05,
+     0.85,
+     0.62
+    ],
+    "frames": [
+     29
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.1,
+     0.55,
+     0.9,
+     1.0
+    ],
+    "frames": [
+     29
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.1,
+     0.05,
+     0.9,
+     0.75
+    ],
+    "frames": [
+     77
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.15,
+     0.05,
+     0.85,
+     0.62
+    ],
+    "frames": [
+     115
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.1,
+     0.55,
+     0.9,
+     1.0
+    ],
+    "frames": [
+     115
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.1,
+     0.05,
+     0.9,
+     0.75
+    ],
+    "frames": [
+     168
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.1,
+     0.6,
+     0.9,
+     1.0
+    ],
+    "frames": [
+     168
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.0,
+     0.0,
+     1.0,
+     1.0
+    ],
+    "frames": [
+     12
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.36,
+     0.4,
+     0.44,
+     0.46
+    ],
+    "frames": [
+     77
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.64,
+     0.6,
+     0.72,
+     0.68
+    ],
+    "frames": [
+     77
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.02,
+     0.62,
+     0.12,
+     0.7
+    ],
+    "frames": [
+     12
+    ]
+   },
+   {
+    "cmd": "zoom",
+    "json": null,
+    "window": null,
+    "box": [
+     0.1,
+     0.6,
+     0.9,
+     1.0
+    ],
+    "frames": [
+     77
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.42,
+     0.8,
+     0.58,
+     0.92
+    ],
+    "frames": [
+     77
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.4,
+     0.5,
+     0.6,
+     0.62
+    ],
+    "frames": [
+     168
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.4,
+     0.61,
+     0.58,
+     0.64
+    ],
+    "frames": [
+     168
+    ]
+   },
+   {
+    "cmd": "color",
+    "json": null,
+    "window": null,
+    "box": [
+     0.42,
+     0.42,
+     0.58,
+     0.455
+    ],
+    "frames": [
+     168
+    ]
+   }
+  ],
+  "images_viewed": 20,
+  "checks": "all passed",
+  "confirmations": [
+   {
+    "where": "segment 1 [00:00.0-00:02.4]",
+    "words": "She wears a fitted dark brown long-sleeve top with a wide square neckline and a gold curb chain necklace",
+    "view": "look/zoom_1.21_15-05-85-62.jpg",
+    "t": 1.208,
+    "box": [
+     0.15,
+     0.05,
+     0.85,
+     0.62
+    ]
+   },
+   {
+    "where": "segment 1 [00:00.0-00:02.4]",
+    "words": "high-waisted wide-leg mid-blue jeans with a silver button",
+    "view": "look/zoom_1.21_10-55-90-100.jpg",
+    "t": 1.208,
+    "box": [
+     0.1,
+     0.55,
+     0.9,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 1 [00:00.0-00:02.4]",
+    "words": "She stands in a bright room with white walls, a light oak plank floor, a pale rounded bouclé pouf behind her on the left and a white-framed glass door with a silver handle at the right edge",
+    "view": "look/zoom_0.50_00-00-100-100.jpg",
+    "t": 0.5,
+    "box": [
+     0.0,
+     0.0,
+     1.0,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 1 [00:00.0-00:02.4]",
+    "words": "low sun from the right lays hard-edged warm patches on the left wall",
+    "view": "look/zoom_0.50_00-00-100-100.jpg",
+    "t": 0.5,
+    "box": [
+     0.0,
+     0.0,
+     1.0,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 1 [00:00.0-00:02.4]",
+    "words": "she lifts both open palms to shoulder height between 00:00.2 and 00:00.8, then drops her arms back to her sides by 00:01.2",
+    "view": "look/frames_0.00_8.04_01.jpg",
+    "t": 0.0,
+    "box": null
+   },
+   {
+    "where": "segment 2 [00:02.4-00:04.1]",
+    "words": "She now wears an oversized white crew-neck sweatshirt printed with one large photographic red apple across the front",
+    "view": "look/zoom_3.21_10-05-90-75.jpg",
+    "t": 3.208,
+    "box": [
+     0.1,
+     0.05,
+     0.9,
+     0.75
+    ]
+   },
+   {
+    "where": "segment 2 [00:02.4-00:04.1]",
+    "words": "mid-blue skinny jeans",
+    "view": "look/zoom_3.21_10-60-90-100.jpg",
+    "t": 3.208,
+    "box": [
+     0.1,
+     0.6,
+     0.9,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 2 [00:02.4-00:04.1]",
+    "words": "Behind her are the same white walls lit by low sun from the right, the pale bouclé pouf at the left, the light oak floor and the white-framed glass door at the right edge",
+    "view": "look/zoom_3.21_10-60-90-100.jpg",
+    "t": 3.208,
+    "box": [
+     0.1,
+     0.6,
+     0.9,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 2 [00:02.4-00:04.1]",
+    "words": "From 00:02.4 she swings her right forearm up and raises one index finger beside her shoulder",
+    "view": "look/frames_2.25_2.50.jpg",
+    "t": 2.375,
+    "box": null
+   },
+   {
+    "where": "segment 2 [00:02.4-00:04.1]",
+    "words": "keeps the finger raised to 00:04.08, tipping it left and right",
+    "view": "look/frames_0.00_8.04_02.jpg",
+    "t": 2.375,
+    "box": null
+   },
+   {
+    "where": "segment 3 [00:04.1-00:06.2]",
+    "words": "She wears a fitted white ribbed sleeveless top with a high round neck, the gold curb chain necklace and a gold chain bracelet on her left wrist",
+    "view": "look/zoom_4.79_15-05-85-62.jpg",
+    "t": 4.792,
+    "box": [
+     0.15,
+     0.05,
+     0.85,
+     0.62
+    ]
+   },
+   {
+    "where": "segment 3 [00:04.1-00:06.2]",
+    "words": "high-waisted fitted mid-blue jeans with two square patch pockets on the front and a silver button",
+    "view": "look/zoom_4.79_10-55-90-100.jpg",
+    "t": 4.792,
+    "box": [
+     0.1,
+     0.55,
+     0.9,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 3 [00:04.1-00:06.2]",
+    "words": "The same white-walled room surrounds her: the pale bouclé pouf at the left, the light oak floor, the white-framed glass door at the right edge, low sun from the right",
+    "view": "look/zoom_4.79_10-55-90-100.jpg",
+    "t": 4.792,
+    "box": [
+     0.1,
+     0.55,
+     0.9,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 3 [00:04.1-00:06.2]",
+    "words": "she raises both fists to chest height with thumbs out at the cut, then from 00:04.5 points both index fingers down toward her waist and keeps pointing to 00:06.1",
+    "view": "look/frames_0.00_8.04_02.jpg",
+    "t": 4.125,
+    "box": null
+   },
+   {
+    "where": "segment 4 [00:06.2-00:08.0]",
+    "words": "She wears an oversized light gray crew-neck sweatshirt with a busy multicolor illustrated print in blue, yellow and orange and large yellow-to-orange block letters across the front",
+    "view": "look/zoom_7.00_10-05-90-75.jpg",
+    "t": 7.0,
+    "box": [
+     0.1,
+     0.05,
+     0.9,
+     0.75
+    ]
+   },
+   {
+    "where": "segment 4 [00:06.2-00:08.0]",
+    "words": "loose light-wash blue straight-leg jeans",
+    "view": "look/zoom_7.00_10-60-90-100.jpg",
+    "t": 7.0,
+    "box": [
+     0.1,
+     0.6,
+     0.9,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 4 [00:06.2-00:08.0]",
+    "words": "The same white-walled room holds behind her: the pale bouclé pouf at the left, the light oak floor, the white-framed glass door at the right edge, low sun from the right",
+    "view": "look/zoom_7.00_10-60-90-100.jpg",
+    "t": 7.0,
+    "box": [
+     0.1,
+     0.6,
+     0.9,
+     1.0
+    ]
+   },
+   {
+    "where": "segment 4 [00:06.2-00:08.0]",
+    "words": "she has both thumbs up beside her chest from the cut, lifts them toward her shoulders around 00:07.3 and keeps them up to the end",
+    "view": "look/frames_0.00_8.04_03.jpg",
+    "t": 6.167,
+    "box": null
+   }
+  ]
+ }
+}

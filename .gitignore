@@ -1,0 +1,17 @@
+# Python caches
+__pycache__/
+*.pyc
+# scan and build outputs (a scan folder holds index.json, frames.json, sheets and look/)
+out/
+scan/
+scans/
+.tmp/
+.tmp_*/
+# editors and the OS
+.DS_Store
+.vscode/
+.idea/
+# development tools
+.ruff_cache/
+.venv/
+*.egg-info/

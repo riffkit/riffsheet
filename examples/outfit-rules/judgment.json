@@ -1,0 +1,105 @@
+{"video_format": "single_shot",
+ "language": "es",
+ "lines": [
+  {"words": "0-0", "mode": "on_camera_dialogue", "speaker": "protagonist", "inferred": [], "cannot_judge": [], "uncertain": []},
+  {"words": "1-4", "mode": "on_camera_dialogue", "speaker": "protagonist", "fix": {"olado,": "holgado,"}, "inferred": [], "cannot_judge": [], "uncertain": []},
+  {"words": "5-8", "mode": "on_camera_dialogue", "speaker": "protagonist", "fix": {"olvado": "holgado"}, "inferred": [], "cannot_judge": [], "uncertain": []},
+  {"words": "9-12", "mode": "on_camera_dialogue", "speaker": "protagonist", "inferred": [], "cannot_judge": [], "uncertain": []},
+  {"words": "13-16", "mode": "on_camera_dialogue", "speaker": "protagonist", "fix": {"olvado": "holgado", "olado,": "holgado,"}, "inferred": [], "cannot_judge": [], "uncertain": []}
+ ],
+ "people": [
+  {"id": "protagonist", "semantic": "A young woman who faces the lens in the same sunlit place in all four shots and changes clothes at every cut, ruling on each fit combination", "time": [0, "end"],
+   "attributes": {"role": "protagonist", "gender": "female", "age_range": "young"}, "inferred": ["age_range"]}
+ ],
+ "captions": [
+  {"id": "caption_hook", "region": "top", "read": [["T1-T16", "acuérdate..."]],
+   "semantic": "Persistent header: the opening spoken word, kept up through the whole video above each rule", "voice_anchor": "vs1", "visual_anchor": null,
+   "highlight_words": [], "highlight_color": null,
+   "color": null, "outline_color": null,
+   "why": "Every text image shows plain white letters with a faint dark shadow; the measured brown fills come from the hair and necklace behind the thin letters"},
+  {"id": "caption_vs2", "region": "cap", "read": [["T1-T4", "ajustado con holgado"]],
+   "semantic": "Rule label: transcribes the fit pair of vs2 (without the spoken verdict)", "voice_anchor": "vs2", "visual_anchor": null,
+   "highlight_words": [], "highlight_color": null,
+   "color": null, "approximate_size": "small", "position_y_ratio": 0.455, "position_x_ratio": 0.5,
+   "why": "No state of this region kept a measured style; read off zoom_0.50_00-00-100-100: white letters, one centered row at about 45% of the frame height, cap height about 2% of the frame"},
+  {"id": "caption_vs3", "region": "cap", "read": [["T6-T7", "holgado con ajustado"]],
+   "semantic": "Rule label: transcribes the fit pair of vs3 (without the spoken verdict)", "voice_anchor": "vs3", "visual_anchor": null,
+   "highlight_words": [], "highlight_color": null,
+   "color": null, "approximate_size": "small", "position_y_ratio": 0.455, "position_x_ratio": 0.5,
+   "why": "No state of this region kept a measured style; read off zoom_3.21_10-05-90-75: white letters, one centered row at the same place as the other rule labels"},
+  {"id": "caption_vs4", "region": "cap", "read": [["T9", "ajustado con ajustado"]],
+   "semantic": "Rule label: transcribes the fit pair of vs4 (without the spoken verdict)", "voice_anchor": "vs4", "visual_anchor": null,
+   "highlight_words": [], "highlight_color": null,
+   "color": null, "approximate_size": "small", "position_y_ratio": 0.455, "position_x_ratio": 0.5,
+   "why": "No state of this region kept a measured style; read off zoom_4.79_15-05-85-62: white letters, one centered row at the same place as the other rule labels"},
+  {"id": "caption_vs5", "region": "cap", "read": [["T11", "holgado con holgado"]],
+   "semantic": "Rule label: transcribes the fit pair of vs5 (without the spoken verdict)", "voice_anchor": "vs5", "visual_anchor": null,
+   "highlight_words": [], "highlight_color": null,
+   "color": null, "approximate_size": "small", "position_y_ratio": 0.455, "position_x_ratio": 0.5,
+   "why": "No state of this region kept a measured style; read off zoom_7.00_10-05-90-75: white letters, one centered row at the same place as the other rule labels"}
+ ],
+ "graphics": [
+  {"id": "check_yes_1", "region": "check1", "semantic": "Approval stamp for the first rule, popping on as the spoken yes arrives",
+   "description": "A green rounded-square emoji tile with a white check mark, centered on the chest just under the rule label; pops on, holds, leaves at the cut", "inline_text": {}, "split": false},
+  {"id": "check_yes_2", "region": "check2", "semantic": "Approval stamp for the third rule; stays up after the rule label leaves until the cut",
+   "description": "A green rounded-square emoji tile with a white check mark, centered on the chest just under the rule label; pops on, holds, leaves at the cut", "inline_text": {}, "split": false},
+  {"id": "check_yes_3", "region": "check3", "semantic": "Approval stamp for the last rule, held to the end",
+   "description": "A green rounded-square emoji tile with a white check mark, centered on the chest just under the rule label; pops on and holds to the end", "inline_text": {}, "split": false}
+ ],
+ "segments": [
+  {"to": "S2", "text": "[image:protagonist] stands facing the lens at the center of the frame in a static, locked eye-level medium-wide shot that runs from just above her head to her knees, her figure taking about a third of the frame width. {She wears a fitted dark brown long-sleeve top with a wide square neckline and a gold curb chain necklace|zoom_1.21_15-05-85-62}, tucked into {high-waisted wide-leg mid-blue jeans with a silver button|zoom_1.21_10-55-90-100}. {She stands in a bright room with white walls, a light oak plank floor, a pale rounded bouclé pouf behind her on the left and a white-framed glass door with a silver handle at the right edge|zoom_0.50_00-00-100-100}; {low sun from the right lays hard-edged warm patches on the left wall|zoom_0.50_00-00-100-100}, and the image is sharp, natural and phone-like. In direct address, eyes on the lens and smiling with her mouth wide open, {she lifts both open palms to shoulder height between 00:00.2 and 00:00.8, then drops her arms back to her sides by 00:01.2|frames_0.00_8.04_01}, a moderate tempo. [image:protagonist] calls out on camera, unhurried, eyebrows raised and mouth wide, [voice:vs1]; the loudest point of the clip, -10 dB at 00:00.4, falls under this word. [image:protagonist] goes on on camera at a measured pace, arms now still at her sides and a broad smile spreading as she finishes, [voice:vs2]. A continuous sound sits under the voice: in 3 of 6 pauses between words the level stays within 20 dB of the -22 dB speech median. After her last word the level drops to -44 dB at 00:02.4 with no word under it, -16 dB in 0.3 s, as the shot ends.", "inferred": [], "uncertain": [], "cannot_judge": ["whether the continuous sound under the voice is music or room ambience", "tone and energy of the voice"]},
+  {"to": "S3", "text": "At 00:02.375 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) changes her clothes while the static, locked eye-level medium-wide framing and the place hold: [image:protagonist] stands at the center, head to knees, about a third of the frame width. {She now wears an oversized white crew-neck sweatshirt printed with one large photographic red apple across the front|zoom_3.21_10-05-90-75} over {mid-blue skinny jeans|zoom_3.21_10-60-90-100}. {Behind her are the same white walls lit by low sun from the right, the pale bouclé pouf at the left, the light oak floor and the white-framed glass door at the right edge|zoom_3.21_10-60-90-100}. Her expression turns disapproving: brows drawn together, lips rounded, eyes on the lens in direct address. {From 00:02.4 she swings her right forearm up and raises one index finger beside her shoulder|frames_2.25_2.50}, and {keeps the finger raised to 00:04.08, tipping it left and right|frames_0.00_8.04_02}, a slow tempo. SOUND AT THE CUTS measures no sound event on the cut at 00:02.375; the nearest is a drop at 00:02.25, 0.12 s before. [image:protagonist] says on camera at a measured pace, frowning with the finger raised, [voice:vs3]. Just before the next cut, [image:protagonist] starts the next line on camera, unhurried, [voice:vs4]; the level reaches its lowest point of the clip, -46 dB at 00:04.1, under that word.", "inferred": [], "uncertain": [], "cannot_judge": ["tone of the spoken no"]},
+  {"to": "S4", "text": "At 00:04.125 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) changes her clothes again in the same static, locked eye-level medium-wide framing: [image:protagonist] stands at the center, head to knees, about a third of the frame width. {She wears a fitted white ribbed sleeveless top with a high round neck, the gold curb chain necklace and a gold chain bracelet on her left wrist|zoom_4.79_15-05-85-62}, tucked into {high-waisted fitted mid-blue jeans with two square patch pockets on the front and a silver button|zoom_4.79_10-55-90-100}. {The same white-walled room surrounds her: the pale bouclé pouf at the left, the light oak floor, the white-framed glass door at the right edge, low sun from the right|zoom_4.79_10-55-90-100}. Still mid-line, she smiles with her mouth wide open, eyes on the lens in direct address; {she raises both fists to chest height with thumbs out at the cut, then from 00:04.5 points both index fingers down toward her waist and keeps pointing to 00:06.1|frames_0.00_8.04_02}, a moderate tempo. The cut lands on no sound event; the nearest is a rise at 00:04.25, 0.12 s after. [image:protagonist] finishes the line on camera, unhurried, ending on a wide smile with teeth showing. After her last word comes the quietest stretch with no word, -44 dB from 00:05.9 to 00:06.2, and the deepest drop, to -46 dB at 00:06.1, -23 dB in 0.3 s.", "inferred": [], "uncertain": [], "cannot_judge": []},
+  {"to": "end", "text": "At 00:06.167 a hard cut (checked on frames: no motion blur, nothing covering the lens, no blended, faded or white frame between) brings the last change of clothes in the same static, locked eye-level medium-wide framing: [image:protagonist] stands at the center, head to knees, about a third of the frame width. {She wears an oversized light gray crew-neck sweatshirt with a busy multicolor illustrated print in blue, yellow and orange and large yellow-to-orange block letters across the front|zoom_7.00_10-05-90-75}, over {loose light-wash blue straight-leg jeans|zoom_7.00_10-60-90-100}. {The same white-walled room holds behind her: the pale bouclé pouf at the left, the light oak floor, the white-framed glass door at the right edge, low sun from the right|zoom_7.00_10-60-90-100}. The SOUND AT THE CUTS line puts the nearest sound event to this cut at a drop at 00:06.02, 0.15 s before. Eyes on the lens in direct address, mouth open in a wide smile, {she has both thumbs up beside her chest from the cut, lifts them toward her shoulders around 00:07.3 and keeps them up to the end|frames_0.00_8.04_03}, a moderate tempo. [image:protagonist] says on camera at a measured pace, beaming, [voice:vs5]. In the last half second the level falls to -43 dB.", "inferred": [], "uncertain": ["the sweatshirt print's lettering is only partly legible: a blue arc at the top is unreadable and the large yellow-orange letters look like CEIANID"], "cannot_judge": []}
+ ],
+ "slots": [
+  {"to": "S2", "formula": {
+    "funnel_stage": "attention",
+    "function": "Announces in one spoken word that a short rule set to memorize is coming, then states the first rule and stamps it approved on a body that shows it.",
+    "mechanism": "A memory cue sets up a checklist whose remaining items the viewer cannot predict, so leaving means missing the rest of the rule.",
+    "viewer_state_before": "Knows nothing; sees a person facing the lens in a styled outfit.",
+    "viewer_state_after": "Knows the format is a pair-of-fits rule with a yes or no verdict and has seen one approved example; waits for the other combinations.",
+    "meaning_contract": {"attention_contract": "You will get a complete, simple rule for combining fits.", "payoff_meaning": "The first combination is correct, shown on a real outfit.", "proof_surface": "The outfit on screen is the example for the rule label and the approval stamp."},
+    "constraint": "Does the first spoken word promise a rule to remember, and does the first combination appear on the body with its verdict within about two seconds?",
+    "sensory_channel": "mixed",
+    "retention_anchor": "The header stays up the whole time, telling the viewer the list is not finished.",
+    "linguistic_craft": "A one-word imperative hook followed by a terse formula: item, with, item, verdict."},
+   "cannot_judge": []},
+  {"to": "S4", "formula": {
+    "funnel_stage": "interest",
+    "function": "Swaps the order of the pair and gives the first refusal, then gives an approval the viewer may not expect, so each verdict has to be checked against the outfit.",
+    "mechanism": "Mirrored pairs with opposite verdicts make the viewer test a guess against each outfit, and a refusal next to approvals breaks the pattern and resets attention.",
+    "viewer_state_before": "Has one approved combination and expects more approvals.",
+    "viewer_state_after": "Has seen one refused and two approved combinations and is completing the grid in their head, waiting for the last cell.",
+    "meaning_contract": {"attention_contract": "Each new outfit is one more cell of the same rule.", "payoff_meaning": "Order matters: which half is fitted changes the verdict.", "proof_surface": "A disapproving face and raised finger for the refusal, pointing at the garment for the approval."},
+    "constraint": "Does each outfit change at a cut together with its rule label, and does at least one verdict break the run of approvals with a visibly different reaction?",
+    "sensory_channel": "visual",
+    "retention_anchor": "One combination of the four is still missing.",
+    "linguistic_craft": "The same three-word frame repeated with only the two adjectives swapped, so the swap itself carries the meaning."},
+   "cannot_judge": ["whether the spoken no sounds emphatic"]},
+  {"to": "end", "formula": {
+    "funnel_stage": "payoff",
+    "function": "Fills the last cell of the grid with an approval and the most enthusiastic gesture, completing a rule the viewer can now repeat.",
+    "mechanism": "Closing the set of all combinations delivers the promised complete rule, and ending on the clearest approval leaves a saveable takeaway.",
+    "viewer_state_before": "Waits for the last remaining combination and its verdict.",
+    "viewer_state_after": "Holds all four combinations with their verdicts, three yes and one no.",
+    "meaning_contract": {"attention_contract": "The list ends when every combination has been ruled on.", "payoff_meaning": "Only one combination is wrong; the rest are allowed.", "proof_surface": "The final outfit with the approval stamp and two raised thumbs."},
+    "constraint": "Does the last shot complete every combination promised by the format, with a verdict as clear as the first?",
+    "sensory_channel": "visual",
+    "retention_anchor": null,
+    "linguistic_craft": "The last item repeats the same adjective twice, closing the pattern."},
+   "cannot_judge": []}
+ ],
+ "cannot_judge": ["pitch, accent and energy of the voice", "whether the continuous sound under the voice is music"],
+ "tool_gaps": [
+  "F1 (0.78,0.02,1.00,1.00) is the white door frame at the right edge and F3 (0.02,0.80,0.18,0.86) the edge of the pouf and floor at the left: no lettering or drawn shape on any overview cell, so `text` was not run on them.",
+  "R1 (0.02,0.10,0.98,1.00) covers the whole figure; the two captions inside it were read with tighter boxes (cap, top) instead.",
+  "The first element command on the first check mark (box 0.38,0.44,0.62,0.58) caught the caption too; a tighter box measured it."
+ ],
+ "images_viewed": 20,
+ "report": {
+  "what_happens": "A young woman stands facing the camera in the same sunny white room for four quick shots, one outfit per shot, all spoken on camera in Spanish. She opens with remember, and a header saying remember stays on screen; each shot then names one combination of fitted and loose pieces, written as a caption, and gives a verdict. Fitted top with loose jeans: yes, with a green check. Loose sweatshirt with skinny jeans: no, with a frown and a raised finger and no check. Fitted top with fitted jeans: yes. Loose sweatshirt with loose jeans: yes, with both thumbs up.",
+  "why_it_holds": "It promises a complete little rule in its first word and then fills in a two-by-two grid one cell per cut, so the viewer keeps watching to get the full set. Every rule is proven on the body in the same frame, so the outfit change at each cut is the information. The single refusal breaks a run of approvals and makes the viewer check each verdict instead of skimming.",
+  "swappable": ["the four outfits and the person wearing them", "the room and light", "the language of the spoken rule and captions", "the approval stamp emoji", "the gesture for each verdict, as long as yes and no look clearly different"]
+ }
+}

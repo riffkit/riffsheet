@@ -1,0 +1,15 @@
+# Settings for the development tools only. The tool itself needs no install step and no packages:
+# run it as `python3 -I scripts/riffsheet.py`.
+
+[tool.ruff]
+line-length = 120
+target-version = "py39"
+extend-exclude = ["scratch"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "B", "UP", "SIM", "I"]
+ignore = [
+    "UP031",   # %-formatting: harmless, and it builds struct formats and filter strings plainly
+    "SIM300",  # "Yoda" comparisons: flags edge tests written in the order the code reads best
+    "SIM114",  # merging if-branches would join two cases that each carry their own comment
+]
