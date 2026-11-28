@@ -6,12 +6,14 @@ This page says how the accuracy of a riffsheet was tested and what came out, inc
 
 Tests 1 and 2 below were run on 2026-11-27, on development builds of the tool made before release 0.1.0. The code has changed since: it was reorganized, a jump cut inside one framing became a cut, and the tool now says where sound events fall on the cuts and caption appearances. Some of those changes came from these tests. The statement counts were not measured again on 0.1.0; the cut figures were (below, under [Measured on 0.1.0](#measured-on-010)).
 
+Release 0.2.0 left the code that measures cuts, captions, stillness and loudness as it was in 0.1.0. It added the check of what the machine has, the record of each optional stage that ran, failed or did not run, and the hearing check. Nothing on this page was measured again on 0.2.0, and none of these tests covers what an agent says after passing the hearing check.
+
 ## What the tool does to stay accurate
 
 - It measures what can be measured instead of estimating it by eye: cut times, the frame on which each caption appears and the frame on which it is gone, and whether the camera holds still, from the frames; loudness, word times and the pace of each line, from the sound.
-- Every value in `riffsheet.json` says where it came from: measured by the tool, seen by the agent, inferred, uncertain, or not judged. Where the evidence does not settle a measurement, the value is left out with the reason.
+- Every value in `riffsheet.json` says where it came from: measured by the tool, seen by the agent, heard by the agent (only after it passes the tool's hearing check), inferred, uncertain, established by the agent's own means, or not judged. Where the evidence does not settle a measurement, the value is left out with the reason.
 - Statements about what people wear and hold, about products and about the place must each name a large view of a moment they describe (a movement may name a sheet of consecutive frames instead). Until every one does, or is marked uncertain, the tool writes no riffsheet. The tool checks that the view exists and shows that moment, not that the agent looked at it or that the words match it: that reading is the agent's, and the tests below are what measure it.
-- What neither the pictures nor the measurements settle, such as tone of voice or what kind of music plays, is listed as not judged rather than guessed.
+- What neither the pictures nor the measurements settle, such as tone of voice or what kind of music plays, is listed as not judged rather than guessed, unless the agent passed the hearing check and heard it.
 
 ## Test 1: statements checked against the frames
 
@@ -84,7 +86,7 @@ What the agents in those two runs were unsure of, and where the tool misled them
 ## What these tests do not show
 
 - The checking agents are the same kind of model as the agent that wrote the riffsheets. They can share its blind spots, and an error both miss is not counted.
-- Anything that needs hearing was not scored in test 1: tone of voice, what kind of music plays, sound effects by name. The riffsheet marks these as not judged rather than guessing.
+- Anything that needs hearing was not scored in test 1: tone of voice, what kind of music plays, sound effects by name. The agents in these tests could not hear, so their riffsheets mark these as not judged. Since 0.2.0 an agent that passes the hearing check may describe the sound; how accurate that is has not been scored.
 - Results vary from run to run, by a few statements per video.
 - Ten videos is a small sample. Formats not in it may do better or worse.
 - Test 2 is one video and one run, and its scorers are the same kind of model as the agent being scored. Facts are not weighted: a color and a cut time count the same.
