@@ -3,6 +3,7 @@
 import os
 import re
 
+from .capabilities import stage_lines
 from .util import mmss
 
 FORMAT_WORDS = {
@@ -98,9 +99,12 @@ def merge_items(items, keep_order=False):
 def headline(m, n_shots, n_lines):
     """The line under the title: length, shots, layout, speech and its language. With no speech the
     agent gives the on-screen text's language (METHOD: metadata), named as that; a language only the
-    transcript gave is then a guess on sound without speech, and is left out."""
+    transcript gave is then a guess on sound without speech, and is left out. With the speech not
+    transcribed, whether anyone speaks is not known, and the line says so instead of "no speech"."""
     lang = m.get("language")
     speech = SPEAKING_WORDS.get(m["speaking_mode"], m["speaking_mode"])
+    if m["speaking_mode"] == "none" and (m.get("_src") or {}).get("speaking_mode") == "cannot_judge_locally":
+        speech = "speech not transcribed"
     if m["speaking_mode"] != "none":
         speech += f" ({lang})" if lang else ""
     elif lang and (m.get("_src") or {}).get("language") == "seen":
@@ -139,6 +143,9 @@ def report_md(idx, A, J):
     title = os.path.splitext(os.path.basename(idx["video"]))[0]
     n_lines = len(A["audio"]["voice_segments"])
     L = [f"# {title}", "", headline(m, len(idx["shots"]), n_lines)]
+    gaps = stage_lines(A["_local"].get("stages") or {}, idx["facts"])
+    if gaps:  # an optional stage that failed or did not run, said where the reader starts
+        L += ["", "**Not in this analysis.** " + " ".join(gaps)]
     sp = A["_local"].get("sound_at_picture")
     if sp:  # measured coincidence of sound events with cuts and caption appearances (times, not hearing)
         parts = [g["summary"] for g in (sp["cuts"], sp["captions"]) if g["changes"]]

@@ -17,6 +17,7 @@ from .audio import (
     sound_at_picture,
     sound_at_summary,
 )
+from .capabilities import STAGE_RECORDS, stage_lines, stages_of
 from .constants import LONG_VIDEO_S, REGION_SETTLE_MIN, STILL_LOCKED, STILL_MOVING
 from .elements import element_candidates, element_line, element_record, find_panes
 from .media import extract_cells, probe, run, run_timeout_for, set_timeout
@@ -331,6 +332,9 @@ def cmd_scan(a):
     # inputs are checked before the output folder is made, so a bad input leaves nothing behind
     info = probe(video)
     words, tmeta = load_words(a.transcript)
+    stages = {k: record(info, tmeta) for k, record in STAGE_RECORDS.items()}
+    if tmeta and tmeta.get("stage"):  # transcribe's record of why it made no transcript: no words in it
+        tmeta = None
     set_timeout(run_timeout_for(info["duration_s"]))
     if info["duration_s"] > LONG_VIDEO_S:
         long_video_warning(info)
@@ -375,6 +379,7 @@ def cmd_scan(a):
         "transcript_meta": (
             {"language": tmeta["language"], "words": len(words), "lines": tmeta["lines"]} if tmeta else None
         ),
+        "stages": stages,
         "shots": shots,
         "events": events,
         "text_regions": regions,
@@ -411,6 +416,9 @@ def summary_text(ix, out):
     tm = ix.get("transcript_meta")
     if tm:
         L.append(f"transcript: {tm['words']} words, {len(tm['lines'])} lines, language {tm['language']}")
+    heard = stages_of(ix)["speech_recognition"]["state"] == "ran"  # words known: sound is set against them
+    for line in stage_lines(stages_of(ix), f):
+        L.append("NOT IN THIS SCAN: " + line + " `check VIDEO` says what it needs.")
     L.append("Times are true frame timestamps in seconds; #n = decoder frame number (0-based).")
     L.append("")
     L.append(
@@ -547,11 +555,16 @@ def summary_text(ix, out):
         )
         ev = [f"{e['t']:.1f} {e['type']} {e['db']:.0f}dB" for e in au["events"] if not e["during_speech"]]
         ns = sum(1 for e in au["events"] if e["during_speech"])
-        L.append(
-            "  loudness events with no word under them: "
-            + (", ".join(ev) or "none")
-            + f"  (+{ns} during speech, in index.json)"
-        )
+        if heard:
+            L.append(
+                "  loudness events with no word under them: "
+                + (", ".join(ev) or "none")
+                + f"  (+{ns} during speech, in index.json)"
+            )
+        else:
+            L.append(
+                "  loudness events (speech not transcribed: none is set against words): " + (", ".join(ev) or "none")
+            )
         L.append(
             "  momentary loudness peaks: " + (", ".join(f"{t:.1f}" for t in au["loudness_peaks_momentary"]) or "none")
         )
@@ -565,7 +578,7 @@ def summary_text(ix, out):
             L.append(
                 "    quietest 0.3 s stretches: "
                 + "; ".join(
-                    f"{a:.1f}–{b:.1f} {v:.0f} dB{' (a word overlaps it)' if sp else ' (no word)'}"
+                    f"{a:.1f}–{b:.1f} {v:.0f} dB" + ((" (a word overlaps it)" if sp else " (no word)") if heard else "")
                     for a, b, v, sp in fx["quietest"]
                 )
             )
@@ -573,14 +586,20 @@ def summary_text(ix, out):
                 "    deepest drops: "
                 + (
                     "; ".join(
-                        f"{t:.1f} to {d:.0f} dB ({dd:+.0f} dB in 0.3 s{', under a word' if sp else ', no word'})"
+                        f"{t:.1f} to {d:.0f} dB ({dd:+.0f} dB in 0.3 s"
+                        + ((", under a word" if sp else ", no word") if heard else "")
+                        + ")"
                         for t, d, dd, sp in fx["deepest_drops"]
                     )
                     or "none"
                 )
             )
             L.append(
-                "    sound with no word under it (>= 0.3 s above -40 dB): "
+                (
+                    "    sound with no word under it (>= 0.3 s above -40 dB): "
+                    if heard
+                    else "    sound (>= 0.3 s above -40 dB; speech not transcribed, so words are not known): "
+                )
                 + ("; ".join(f"{a:.1f}–{b:.1f} {v:.0f} dB" for a, b, v in fx["sound_without_words"]) or "none")
             )
         uv = au.get("under_voice") or {}

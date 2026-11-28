@@ -1,8 +1,10 @@
 """riffsheet: measure a short video and lay out the pictures a reading agent needs.
 
 Needs ffmpeg + ffprobe on PATH and the Python standard library. No network. Only the optional
-`transcribe` command needs a package (faster-whisper) and a speech model on this machine.
+`transcribe` command needs a package (faster-whisper) and a speech model on this machine; `check`
+says whether they are here and what getting them costs.
 
+  check  [VIDEO] [--json]                        what this machine can do, and what this video needs (run first)
   transcribe VIDEO --out T.json [--hint TEXT]    word-timed transcript (optional; needs faster-whisper)
   scan   VIDEO --out DIR [--transcript T.json]   everything up front (run first)
   text   DIR --box x0,y0,x1,y1 [--from S --to E] each distinct state of a region, once, with on/off times
@@ -28,6 +30,7 @@ import sys
 
 from . import FORMAT_VERSION, VERSION
 from .build import cmd_build
+from .capabilities import cmd_check
 from .elements import cmd_element
 from .scan import cmd_scan
 from .scandir import remove_scratch
@@ -48,6 +51,10 @@ def main(argv=None, entry=None):
         "--version", action="version", version=f"riffsheet {VERSION} (analysis format_version {FORMAT_VERSION})"
     )
     sub = ap.add_subparsers(dest="cmd", required=True)
+    p = sub.add_parser("check", help="what this machine can do for an analysis (no network)")
+    p.add_argument("video", nargs="?", help="a video: also say which optional pieces matter for it")
+    p.add_argument("--json", action="store_true", help="the report as JSON")
+    p.set_defaults(fn=cmd_check)
     p = sub.add_parser("transcribe", help="word-timed transcript (needs faster-whisper; optional)")
     p.add_argument("video")
     p.add_argument("--out", required=True, help="transcript JSON to write")

@@ -246,7 +246,12 @@ ANALYSIS_SCHEMA = {
                 "duration_seconds": _NUM,
                 "video_format": {"type": "string", "description": "one of " + ", ".join(VIDEO_FORMATS)},
                 "language": {"type": ["string", "null"]},
-                "speaking_mode": {"enum": ["none", "on_camera", "voiceover", "mixed"]},
+                "speaking_mode": {
+                    "enum": ["none", "on_camera", "voiceover", "mixed"],
+                    "description": "from the spoken lines; none with _src.speaking_mode cannot_judge_locally means "
+                    "the speech was not transcribed (_local.stages says why): the analysis has no spoken lines, "
+                    "and whether anyone speaks is not known",
+                },
                 "_src": _SRC,
             },
         },
@@ -290,6 +295,31 @@ ANALYSIS_SCHEMA = {
             "properties": {
                 "method": {"type": "string"},
                 "scan": {"type": "string", "description": "the scan folder, relative to the output folder"},
+                "stages": {
+                    "type": "object",
+                    "description": "tool-written: each optional stage (speech_recognition) and whether it ran "
+                    "(by: what made it), failed (why) or did not run (why); absent in files written before "
+                    "riffsheet 0.2.0",
+                    "additionalProperties": {
+                        "anyOf": [
+                            {
+                                "type": "object",
+                                "required": ["state", "by"],
+                                "additionalProperties": False,
+                                "properties": {"state": {"const": "ran"}, "by": {"type": "string"}},
+                            },
+                            {
+                                "type": "object",
+                                "required": ["state", "why"],
+                                "additionalProperties": False,
+                                "properties": {
+                                    "state": {"enum": ["failed", "not_run"]},
+                                    "why": {"type": "string"},
+                                },
+                            },
+                        ]
+                    },
+                },
                 "tags": {"type": "string"},
                 "cuts": {"type": "array", "items": _NUM},
                 "non_cut_changes": {

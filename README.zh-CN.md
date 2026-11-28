@@ -14,11 +14,11 @@
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/media/hero_still.png"><img src="docs/media/hero.gif" width="880" alt="我们自己的一条短视频在播放，旁边是它的 riffsheet 随播放逐步填出：测得的剪辑点、字幕和声音，以及 agent 对每个镜头的判断。"></picture></p>
 <p align="center"><sub>我们自己的一条视频，由 riffsheet 拆解。完整结果见 <a href="examples/red-carpet/">examples/red-carpet</a>。</sub></p>
 
-> 本页译自 [README.md](README.md)；两者不一致时以英文版为准。仓库里的其他文档（评测、示例说明、方法和工具手册、更新记录）目前只有英文，riffsheet 生成的结果也是英文的。
+> 本页译自 [README.md](README.md)；两者不一致时以英文版为准。仓库里的其他文档（评测、示例说明、方法和工具手册、更新记录）目前只有英文。riffsheet 经过检查的结果是英文的；你用中文提要求时，agent 会另外写一份中文阅读版。
 
 ## 安装
 
-需要 ffmpeg 7 或更新版本，以及 Python 3.9 或更新版本。要识别说出的话，还需要可选的 `faster-whisper` 包（见[环境要求](#环境要求)）。
+需要 ffmpeg 7 或更新版本，以及 Python 3.9 或更新版本。要识别说出的话，还需要可选的 `faster-whisper` 包和它的语音模型。分析之前，agent 会先检查这台电脑上有什么；如果视频有声音而语音识别还没装，它会告诉你装上能多得到什么、要下载多少，只有你同意才会安装（见[环境要求](#环境要求)）。
 
 **1. 直接告诉你的 agent**（Claude Code、Codex，或任何能执行命令的 agent）：
 
@@ -47,7 +47,7 @@ git clone https://github.com/riffkit/riffsheet ~/.agents/skills/riffsheet   # Co
 分析这条 Reel，把每条字幕和它出现的时间列出来。
 ```
 
-大约 4 到 8 分钟后，你会得到供人阅读的 `riffsheet.md`，以及包含全部数值的 `riffsheet.json`。下面是其中一个示例的开头，一条 8 秒、用西班牙语说话的视频（结果是英文的，以下原样引用）：
+大约 4 到 8 分钟后，你会得到供人阅读的 `riffsheet.md`，以及包含全部数值的 `riffsheet.json`；如果你用其他语言提要求，还会有一份那种语言的 `riffsheet.md` 译本。下面是其中一个示例的开头，一条 8 秒、用西班牙语说话的视频（这是经过检查的英文版，以下原样引用）：
 
 > **8.042 s · 4 shots · one picture at a time · spoken on camera (es) · 5 spoken lines**
 >
@@ -68,10 +68,11 @@ git clone https://github.com/riffkit/riffsheet ~/.agents/skills/riffsheet   # Co
 
 ## 你会得到什么
 
-每条视频两个文件：
+每条视频两个文件；如果你用英语以外的语言，还有第三个：
 
 - `riffsheet.md`：写给人读的视频说明。先讲发生了什么、为什么能留住观众，再按顺序讲每个节拍：画面上有什么、说了什么、这个节拍对观众起什么作用，以及复刻时必须保留什么。
 - `riffsheet.json`：完整数据。每句台词及其时间和语速；每条字幕的文字、时间、位置、大小和颜色；每个图形元素的框和时间；人物和物体；每一段带时间码的描述；声音事件落在剪辑点和字幕出现处的情况；以及每个值的来源。格式见 [`schema/riffsheet.schema.json`](schema/riffsheet.schema.json)。
+- `riffsheet.zh.md`（或 `.es.md`、`.ja.md` 等）：用你的语言写的同一份说明，由 agent 根据经过检查的 `riffsheet.md` 写成：所有时间和数字都不变，台词和画面上的字保留视频本身的语言。
 
 上面引用的那句台词在 `riffsheet.json` 里的样子，包括 agent 对一个听错的词所做的更正：
 
@@ -90,6 +91,7 @@ git clone https://github.com/riffkit/riffsheet ~/.agents/skills/riffsheet   # Co
 - **每个值都注明来源：** 工具测得、agent 看到、推断、不确定，或未判断。证据不足以确定一个测量值时，工具不给出这个值，并说明原因。
 - **每个细节都指向那一刻的近景。** 关于人物穿戴和手持物、产品或场景的每句描述，都必须指明一张拍到那一刻的大图，否则就要标为不确定；在此之前工具不会生成 riffsheet。工具检查这张图存在、并且拍的是那一刻；文字与图是否相符，由 agent 负责核对。
 - **说清楚它判断不了什么。** 语气、放的是哪类音乐，以及画面和测量都无法确定的其他内容，都列为未判断。
+- **说清楚哪一步没有运行。** 如果没有装语音识别，或者语音识别出错，riffsheet 会在第一行下面写明说出的话没有转写、原因是什么；它不会读起来像一条没人说话的视频。
 - **除了 ffmpeg 不用装别的。** 纯 Python，只用标准库。不需要下载模型；语音识别是可选的。
 - **解释视频为什么有效。** 逐个节拍说明每一部分对观众起什么作用，并给出复刻时要保住它必须通过的一项检验。
 
@@ -110,12 +112,12 @@ agent 遵循的流程见 [`references/METHOD.md`](references/METHOD.md)；每条
 
 ## 它做不到什么
 
-- **听。** 它测量响度、词的时间，以及声音事件落在剪辑点和字幕出现处的情况，但说不出那是什么声音：音乐、语气和音效都标为未判断。没人说话时语音识别也可能返回文字；agent 会检查嘴型并把它们放到一边（见 red-carpet 示例）。
+- **听。** 它测量响度、词的时间，以及声音事件落在剪辑点和字幕出现处的情况，但说不出那是什么声音：音乐、语气和音效都标为未判断。没人说话时语音识别也可能返回文字；agent 会检查嘴型并把它们放到一边（见 red-carpet 示例）。没有语音识别时，就完全没有台词。
 - **自己读文字。** 工具找出字幕以及字幕何时变化；文字由 agent 从图片上读出。字幕样式测不出来时，agent 给出自己的判断并注明。
 - **抓到每一处剪辑。** 同一机位内的跳切，要在一帧之内有十分之一以上的画面变化、且颜色保持一致才会被找到：在一条 45 秒的口播视频上找到 9 处中的 7 处。更小的跳切会提示 agent 判断，或者找不到；在同一背景上淡入另一套衣服、另一个人或另一个物体检测不到；缓慢的叠化可能漏掉。全部已知局限见 [`references/TOOL.md`](references/TOOL.md)。
 - **处理好长视频。** 它为一分钟以内的片段设计，在 8 到 45 秒的片段上测试过。更长的视频照样能跑，但总览图的间隔会拉大；超过三分钟时，工具会提示哪些步骤会慢。
 - **从链接下载视频。** 请给它视频文件。
-- **用你的语言写结果。** 不管你用什么语言提要求，riffsheet 的内容都是英文的。视频本身可以是任何语言：台词和画面上的字照原样保留。
+- **检查译本。** 不管你用什么语言提要求，工具检查的 riffsheet 都是英文的。你用其他语言提要求时，agent 会另外用那种语言写一份译本，工具不检查这份译本；两者不一致时，以英文版为准。视频本身可以是任何语言：台词和画面上的字在两份里都照原样保留。
 
 ## 时间和成本
 
@@ -125,7 +127,7 @@ agent 遵循的流程见 [`references/METHOD.md`](references/METHOD.md)；每条
 
 riffsheet 告诉你每个节拍起什么作用、你的版本必须保留什么。字幕、卡片、图形、节奏和剪辑，都可以根据测得的时间、框和颜色，用代码（ffmpeg、脚本）或视频编辑软件重建。人物、场景和产品的画面却不行：它需要摄像机，或者视频模型。
 
-[Riffkit](https://riffkit.ai/?utm_source=riffsheet&utm_medium=github&utm_campaign=riffsheet&utm_content=zh_readme_footage) 根据你的原视频生成这些画面，可以免费开始。Swap（替换）保留镜头，换掉镜头里的人或物；Adapt（改编）保留视频有效的地方，讲一个新故事。Riffkit 自己的技能会告诉 agent 如何配合 riffsheet 使用它。
+[Riffkit](https://riffkit.ai/?utm_source=riffsheet&utm_medium=github&utm_campaign=riffsheet&utm_content=zh_readme_footage) 根据你的原视频生成这些画面，可以免费开始。你把视频文件或 TikTok 链接交给 Riffkit，它会自己分析视频，包括声音。Swap（替换）保留镜头，换掉镜头里的人或物；Adapt（改编）保留视频有效的地方，讲一个新故事。Riffkit 自己的技能会告诉 agent 如何配合 riffsheet 使用它。
 
 两个示例用 Swap 复刻后的样子：
 
@@ -140,11 +142,11 @@ Swap 还能换的其他东西，例如外套的颜色，或者同时换衣服和
 
 ## 隐私
 
-一切都在你的电脑上运行：视频、图片和结果都留在你选定的文件夹里。唯一的联网操作是下载语音模型，而且只在你用 `--download` 要求时才会发生。你的编程 agent 向它自己的模型服务商发送什么，由那个 agent 决定。
+一切都在你的电脑上运行：视频、图片和结果都留在你选定的文件夹里。唯一的联网操作是安装语音识别，而且只在你同意时才会发生：安装 `faster-whisper` 包，以及下载语音模型（工具只在用 `--download` 要求时才下载）。你的编程 agent 向它自己的模型服务商发送什么，由那个 agent 决定。
 
 ## 常见问题
 
-**能离线用吗？** 能。下载完可选的语音模型之后，没有任何操作需要联网。
+**能离线用吗？** 能。装好可选的语音识别之后，没有任何操作需要联网。
 
 **支持哪些 agent？** 任何能执行 shell 命令、能打开图片的 agent：Claude Code 和 Codex 会把它识别为技能；其他 agent 可以让它去读 `SKILL.md`。
 
@@ -158,9 +160,9 @@ Swap 还能换的其他东西，例如外套的颜色，或者同时换衣服和
 
 - ffmpeg 和 ffprobe，版本 7 或更新，放在 `PATH` 上（macOS 上用 `brew install ffmpeg`，Linux 上用你的包管理器）。
 - Python 3.9 或更新版本。工具本身只用标准库。
-- 识别说出的话（可选）：`faster-whisper` 包，`python3 -m pip install faster-whisper`，以及它的语音模型。工具使用 `small` 模型，从不自行下载：第一次使用时，给 `transcribe` 加上 `--download`（约 500 MB，存在通常的 Hugging Face 缓存里）。没有语音识别时，分析照样覆盖所有画面内容，你也可以提供用其他方式做的、同样格式的转写。如果把 faster-whisper 装在虚拟环境里，每条命令都要用那个环境的 Python 运行；`SKILL.md` 里写了做法。
+- 识别说出的话（可选）：`faster-whisper` 包和它的 `small` 语音模型。`python3 -I scripts/riffsheet.py check` 会告诉你它们在不在这台电脑上、要花多少（包约 64 MB 下载、占 207 MB 磁盘，在 macOS 上测得；模型 486 MB，只下载一次），并打印把它们装进单独虚拟环境 `~/.riffsheet/venv` 的命令（不改动系统自带的 Python），以及删除它们的命令。工具从不自行下载模型：`transcribe` 只有加上 `--download` 才会下载，存在通常的 Hugging Face 缓存里。agent 会先运行 `check`，在做这些之前先问你。没有语音识别时，分析照样覆盖所有画面内容，并写明说出的话没有转写；你也可以提供用其他方式做的、同样格式的转写。
 
-检查安装：进入仓库文件夹，运行 `python3 -I scripts/riffsheet.py --version`；测试用 `python3 -B -m unittest` 运行（测试会用 ffmpeg 自己生成测试片段）。
+检查安装：进入仓库文件夹，运行 `python3 -I scripts/riffsheet.py check`；测试用 `python3 -B -m unittest` 运行（测试会用 ffmpeg 自己生成测试片段）。
 
 ## 参与贡献与许可
 

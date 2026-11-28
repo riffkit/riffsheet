@@ -2,6 +2,17 @@
 
 The tool's version is printed by `python3 -I scripts/riffsheet.py --version`, with the version of the `riffsheet.json` format it writes (`format_version`).
 
+## 0.2.0
+
+The analysis says what this machine could and could not do for it, and never drops a stage silently.
+
+- New `check [VIDEO] [--json]`, run before an analysis, no network: ffmpeg's version and any filter the tool needs that it lacks, and each optional capability (today speech recognition) as ready, missing or partly there (package installed but model not here, or installed only in `~/.riffsheet/venv`), with what it adds, what getting it costs (the faster-whisper package about 64 MB to download and 207 MB on disk, measured for 1.2.1 on Python 3.9 on macOS; the `small` model 486 MB) and the commands that prepare it in a virtual environment of its own, leaving the system Python as it is, and remove it again. With a video it says which pieces matter for it (speech recognition does not for a video without an audio track).
+- Every optional stage ends in one of three recorded states: ran (and by what), failed (and why) or did not run (and why). `scan` writes them to `index.json` (`stages`), `build` to `riffsheet.json` (`_local.stages`), and when one failed or did not run, `riffsheet.md` says so under its first line. When `transcribe` cannot make a transcript it exits 1 as before and now also leaves at `--out` a record of why, which `scan --transcript` takes; an error inside the recognizer is reported in one line instead of a traceback.
+- A video analyzed without speech recognition no longer reads as "no speech": the line under the title says `speech not transcribed`, `metadata.speaking_mode` is `none` tagged `cannot_judge_locally`, the scan summary and the build sheet say why there are no words and do not set loudness events against words, and a sentence in the prose or report saying that nobody speaks is a problem `build` lists.
+- The instructions: the agent runs `check` first; when a missing piece matters for the video, it tells the person what it adds and costs and asks once, prepares it only on a yes, and otherwise carries on and says what the result lacks. It talks to the person in their language, and when they do not work in English it also writes a translation of `riffsheet.md` into their language beside it (`riffsheet.zh.md` and so on), with every time, number, spoken line and on-screen word unchanged; the checked files stay in English.
+- `format_version` stays 1: everything added to `riffsheet.json` is optional (`_local.stages` is absent in files written before), and no field changed type or meaning; `_src.speaking_mode` uses a value the format already had.
+- The two examples are rebuilt so that their `riffsheet.json` has `_local.stages`; the agents' words are unchanged.
+
 ## 0.1.0
 
 First public release.

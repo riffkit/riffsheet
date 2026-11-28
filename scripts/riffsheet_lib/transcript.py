@@ -21,6 +21,11 @@ def load_words(path):
             f'"words": [{{"start": s, "end": s, "word": ...}}]}}]}} (faster-whisper\'s format)'
         )
     lang = d.get("language") if isinstance(d, dict) else None
+    stage = d.get("stage") if isinstance(d, dict) else None
+    if stage is not None and not (
+        isinstance(stage, dict) and stage.get("state") in ("failed", "not_run") and isinstance(stage.get("why"), str)
+    ):
+        die(f'transcript {path}: "stage" must be {{"state": "failed" or "not_run", "why": "..."}}')
     words = []
     for si, s in enumerate(segs):
         ws = s.get("words") or []
@@ -41,7 +46,12 @@ def load_words(path):
         {"i": si, "start": float(s["start"]), "end": float(s["end"]), "text": str(s.get("text", "")).strip()}
         for si, s in enumerate(segs)
     ]
-    return words, {"language": lang, "lines": lines}
+    meta = {"language": lang, "lines": lines, "model": d.get("model") if isinstance(d, dict) else None}
+    if stage:  # transcribe's record of why it made no transcript (stop): it holds no words
+        if words:
+            die(f"transcript {path}: a record of a transcription that {stage['state']} holds no words")
+        meta["stage"] = stage
+    return words, meta
 
 
 def words_at(words, t):
@@ -120,52 +130,8 @@ def _align(ref, hyp):
     return out[::-1]
 
 
-def cmd_transcribe(a):
-    """Word-timed transcript with faster-whisper, when it is installed (the only part of riffsheet
-    that needs more than the standard library and ffmpeg)."""
-    video = os.path.abspath(a.video)
-    check_video_path(video)
-    r = run(
-        ["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries", "stream=index", "-of", "csv=p=0", video]
-    )
-    if r.returncode != 0:
-        die(f"ffprobe cannot read {video}: " + r.stderr.decode("utf-8", "ignore").strip()[-300:])
-    if not r.stdout.strip():
-        die("no audio stream in " + video + ": nothing to transcribe (scan works without a transcript)")
-    try:
-        import numpy as np
-        from faster_whisper import WhisperModel, download_model
-    except ImportError:
-        die(
-            f"transcribe needs the faster-whisper package (pip install faster-whisper), which is not "
-            f"importable by this Python ({sys.executable}). If it is installed in another Python (a virtual "
-            f"environment), run riffsheet with that one, for this and every other command: "
-            f"/path/to/venv/bin/python -I scripts/riffsheet.py transcribe ... (every command runs on any "
-            f"Python 3.9 or newer). Or scan without --transcript (no spoken lines), or make the transcript "
-            'elsewhere and pass it to scan --transcript. Format: JSON {"language": "en", "segments": '
-            '[{"start": s, "end": s, "text": "...", "words": [{"start": s, "end": s, '
-            '"word": " word", "prob": 0.97}, ...]}, ...]} (faster-whisper\'s output with '
-            "word_timestamps=True; openai-whisper's 'probability' key is read too)."
-        )
-    # decoded here, not by faster-whisper: its own decoder depends on the PyAV version installed
-    r = run(["ffmpeg", "-nostdin", "-v", "error", "-i", video, "-vn", "-ac", "1", "-ar", "16000", "-f", "s16le", "-"])
-    if r.returncode != 0:
-        die("audio decode failed: " + r.stderr.decode()[-300:])
-    audio = np.frombuffer(r.stdout, np.int16).astype(np.float32) / 32768.0
-    if len(audio) == 0:
-        die("the video has no audio")
-    try:  # a model name is resolved to a local folder first: a folder of that name here would be taken
-        path = (
-            a.model
-            if os.path.isfile(os.path.join(a.model, "model.bin"))
-            else download_model(a.model, local_files_only=not a.download, cache_dir=a.model_dir)
-        )
-    except Exception as e:  # the hub raises its own error types (no network, no such model, no cache)
-        die(
-            f"model {a.model!r} is not on this machine ({type(e).__name__}). Pass --download to fetch it "
-            f"(network), or --model-dir DIR if it sits in another cache."
-        )
-    t0 = time.time()
+def _recognize(WhisperModel, path, audio, a):
+    """faster-whisper's segments and words, rounded as the transcript stores them, and its run info."""
     m = WhisperModel(path, device="cpu", compute_type="int8")
     # whisper's own fallback (re-decode at a higher temperature when a decode looks degenerate) stays
     # on: without it sung or music-heavy audio can come back as a stock phrase instead of the words
@@ -188,6 +154,84 @@ def cmd_transcribe(a):
                 ],
             }
         )
+    return out, info
+
+
+def stop(out, state, why, msg=None):
+    """Stop `transcribe` without a transcript, leaving at --out a record of why: `scan --transcript` reads
+    it and the riffsheet says the speech recognition failed or did not run, and why. The record holds no
+    segments, so nothing in it can be taken for words."""
+    write_json(out, {"segments": [], "stage": {"state": state, "why": why}}, ensure_ascii=False, indent=1)
+    die((msg or why) + f" (recorded in {out}: pass it to scan --transcript and the riffsheet says why)")
+
+
+def cmd_transcribe(a):
+    """Word-timed transcript with faster-whisper, when it is installed (the only part of riffsheet
+    that needs more than the standard library and ffmpeg)."""
+    video = os.path.abspath(a.video)
+    check_video_path(video)
+    r = run(
+        ["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries", "stream=index", "-of", "csv=p=0", video]
+    )
+    if r.returncode != 0:
+        die(f"ffprobe cannot read {video}: " + r.stderr.decode("utf-8", "ignore").strip()[-300:])
+    if not r.stdout.strip():
+        stop(
+            a.out,
+            "not_run",
+            "the video has no audio track",
+            "no audio stream in " + video + ": nothing to transcribe (scan works without a transcript)",
+        )
+    try:
+        import numpy as np
+        from faster_whisper import WhisperModel, download_model
+    except ImportError:
+        stop(
+            a.out,
+            "not_run",
+            f"the faster-whisper package is not installed for the Python that ran transcribe ({sys.executable})",
+            f"transcribe needs the faster-whisper package, which is not importable by this Python "
+            f"({sys.executable}). `check` says what installing it costs and prints the commands that put it "
+            f"in a virtual environment of its own; then run riffsheet with that environment's Python, for this "
+            f"and every other command (every command runs on any Python 3.9 or newer). Or scan without "
+            f"--transcript (no spoken lines), or make the transcript elsewhere and pass it to scan --transcript. "
+            'Format: JSON {"language": "en", "segments": [{"start": s, "end": s, "text": "...", "words": '
+            '[{"start": s, "end": s, "word": " word", "prob": 0.97}, ...]}, ...]} (faster-whisper\'s output with '
+            "word_timestamps=True; openai-whisper's 'probability' key is read too).",
+        )
+    # decoded here, not by faster-whisper: its own decoder depends on the PyAV version installed
+    r = run(["ffmpeg", "-nostdin", "-v", "error", "-i", video, "-vn", "-ac", "1", "-ar", "16000", "-f", "s16le", "-"])
+    if r.returncode != 0:
+        why = "audio decode failed: " + re.sub(r"\s+", " ", r.stderr.decode("utf-8", "ignore")[-300:]).strip()
+        stop(a.out, "failed", why)
+    audio = np.frombuffer(r.stdout, np.int16).astype(np.float32) / 32768.0
+    if len(audio) == 0:
+        stop(a.out, "failed", "the audio track decoded to no samples")
+    try:  # a model name is resolved to a local folder first: a folder of that name here would be taken
+        path = (
+            a.model
+            if os.path.isfile(os.path.join(a.model, "model.bin"))
+            else download_model(a.model, local_files_only=not a.download, cache_dir=a.model_dir)
+        )
+    except Exception as e:  # the hub raises its own error types (no network, no such model, no cache)
+        how = "could not be fetched" if a.download else "is not on this machine"
+        stop(
+            a.out,
+            "failed" if a.download else "not_run",
+            f"the speech model ({a.model}) {how} ({type(e).__name__})",
+            f"model {a.model!r} {how} ({type(e).__name__}). "
+            + (
+                "Check the network and run again."
+                if a.download
+                else "Pass --download to fetch it (network; `check` says its size), "
+            )
+            + ("" if a.download else "or --model-dir DIR if it sits in another cache."),
+        )
+    t0 = time.time()
+    try:
+        out, info = _recognize(WhisperModel, path, audio, a)
+    except Exception as e:  # the model or its runtime failing (a damaged model file, too little memory)
+        stop(a.out, "failed", f"faster-whisper stopped with {type(e).__name__}: {str(e)[:200]}")
     res = {"language": info.language, "model": f"faster-whisper {a.model} (int8, cpu)", "hint": a.hint, "segments": out}
     secs = round(time.time() - t0, 1)
     write_json(a.out, res, ensure_ascii=False, indent=1)

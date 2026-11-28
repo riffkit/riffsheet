@@ -7,6 +7,7 @@ import sys
 
 from . import FORMAT_VERSION
 from .audio import sound_at_picture, sound_at_summary
+from .capabilities import stage_lines, stages_of
 from .constants import (
     DESCENDERS,
     EXIT_REFUSED,
@@ -807,6 +808,39 @@ def check_voiceover_in_summary(s):
         )
 
 
+NO_SPEECH_WORDS = re.compile(
+    r"\b(?:no (?:speech|dialogue|talking|narration|voice(?:[\s-]?over)?|spoken (?:words?|lines?))|"
+    r"(?:nobody|no[\s-]one) (?:speaks|talks|says)|(?:never|does not|doesn't|do not|don't) (?:speak|talk)s?|"
+    r"wordless|without (?:any )?(?:speech|words|dialogue|speaking|talking))\b",
+    re.I,
+)
+
+
+def speech_unknown(s):
+    """Why the speech is not known (speech recognition failed or did not run on a video with sound), or
+    None when it is known."""
+    st = stages_of(s.idx)["speech_recognition"]
+    return st["why"] if st["state"] != "ran" and s.idx["facts"].get("has_audio") else None
+
+
+def check_no_speech_claims(s):
+    """With the speech not transcribed, nothing has measured whether anyone speaks: text saying that
+    nobody does would state as fact what was never measured."""
+    why = speech_unknown(s)
+    if not why:
+        return
+    R = s.J.get("report") or {}
+    for where, text in [("prose", s.prose)] + [
+        (f"report {k}", str(R.get(k) or "")) for k in ("what_happens", "why_it_holds")
+    ]:
+        for m in NO_SPEECH_WORDS.finditer(text):
+            s.problems.append(
+                f"{where}: '{m.group(0)}', but the speech was not transcribed ({why}): whether anyone speaks is "
+                f"not known. Say that the speech was not transcribed, and describe only what the pictures show "
+                f"(a mouth that moves or stays closed)"
+            )
+
+
 def check_measured_colors(s):
     """A color written in a confirmed statement that no `color` measurement of that moment could be:
     the cheap mismatch the tool can see (the reading itself stays the agent's)."""
@@ -1078,7 +1112,9 @@ def build_metadata(s):
         "speaking_mode": s.speaking,
         "_src": {
             "duration_seconds": "measured",
-            "speaking_mode": "measured",
+            # with the speech not transcribed nothing measured whether anyone speaks: "none" only means
+            # that the analysis has no spoken lines
+            "speaking_mode": "cannot_judge_locally" if speech_unknown(s) else "measured",
             "video_format": "seen" if J.get("video_format") else "default",
             "language": "seen" if J.get("language") else "measured",
         },
@@ -1097,6 +1133,7 @@ STAGES = (
     build_prose,
     check_garment_color_names,
     check_voiceover_in_summary,
+    check_no_speech_claims,
     check_measured_colors,
     build_slots,
     check_cuts_named,
@@ -1166,6 +1203,7 @@ def analysis_of(s, d, out_dir):
         "_local": {
             "method": "riffsheet build",
             "scan": os.path.relpath(d, out_dir),
+            "stages": stages_of(idx),
             "tags": "untagged = seen; _src lists measured fields and exceptions only",
             "cuts": s.cuts,
             "non_cut_changes": [
@@ -1230,10 +1268,15 @@ def checks_line(n_problems, n_unconfirmed):
 
 
 def print_report(s):
+    unknown = speech_unknown(s)
     print(
-        f"  {s.dur} s, {len(s.idx['shots'])} shot(s), speaking {s.speaking}, {len(s.vsegs)} line(s), "
+        f"  {s.dur} s, {len(s.idx['shots'])} shot(s), speaking {s.speaking}"
+        + (" (speech not transcribed)" if unknown else "")
+        + f", {len(s.vsegs)} line(s), "
         f"{len(s.ents)} entit(ies), {len(s.psegs)} prose segment(s), {len(s.slots)} slot(s)"
     )
+    for line in stage_lines(stages_of(s.idx), s.idx["facts"]):
+        print("NOT IN THIS ANALYSIS: " + line + " riffsheet.md says so under its first line.")
     if s.line_facts:
         print("LINES (measured: pace band to use in prose; cut crossings; low-probability words)")
         print("\n".join(s.line_facts))
@@ -1287,7 +1330,15 @@ def build_sheet(d, idx, words, cuts):
     print(f"build sheet for {d} (no judgment file given: nothing written)")
     print(f"duration {idx['facts']['duration_video_s']} s; cuts at " + (", ".join(fmt_t(c) for c in cuts) or "none"))
     if not words:
-        print("no transcript words")
+        st = stages_of(idx)["speech_recognition"]
+        if st["state"] == "ran":
+            print(f"no transcript words: speech recognition ({st['by']}) heard none")
+        else:
+            verb = "failed" if st["state"] == "failed" else "did not run"
+            print(
+                f"no transcript words: speech recognition {verb}: {st['why']}. The judgment has no lines; "
+                f"never write that nobody speaks: whether anyone does is not known"
+            )
     else:
         print(
             f"WORDS language {tm.get('language')}: index:word@start (seconds), '?' = probability < 0.5, "
