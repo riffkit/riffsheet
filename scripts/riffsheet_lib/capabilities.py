@@ -21,6 +21,7 @@ import sys
 
 from . import VERSION, util
 from .constants import FFMPEG_MIN_MAJOR
+from .hearing import SYNTHESIZERS, synthesizer
 from .media import probe
 from .transcript import TRANSCRIBE_MODEL
 
@@ -83,6 +84,11 @@ SPEECH_OTHER_WAYS = (
     "any recognizer that gives a word-timed transcript in the format `transcribe` writes (references/TOOL.md), "
     "or a transcript the person supplies in it; `scan --transcript-by` records what made it"
 )
+HEARING_ADDS = (
+    "if the agent's model takes sound as input and passes the check: what the sound is (music or not and what "
+    "kind, tone of voice, what a sound effect is), each statement marked heard by the agent"
+)
+HEARING_LACKS = "what the sound is stays not judged; times and loudness are measured either way"
 SPEECH_LACKS = (
     "the riffsheet quotes no spoken line and cannot say whether anyone speaks; it says that the speech was not "
     "transcribed, and why"
@@ -260,13 +266,68 @@ def speech_for_video(info):
     return "the video has no audio track: there is nothing to transcribe" if not info["has_audio"] else None
 
 
-CAPABILITIES = ((speech_status, speech_for_video),)  # (status, plain exclusion for a video) per capability
+def hearing_status():
+    """The hearing check's entry of `check`: whether this machine can make the check's sound. Whether the
+    agent can hear is not this machine's to report: only the check settles it."""
+    syn = synthesizer()
+    facts = [
+        f"a speech synthesizer is here to make the check's sound: {syn[0]} at {syn[1]}"
+        if syn
+        else f"no speech synthesizer is on PATH ({', '.join(SYNTHESIZERS)}), so the check's sound cannot be "
+        f"made here (espeak-ng is in most Linux package managers)",
+        "whether this agent can hear is not known here: only the check, taken after `scan`, settles it",
+    ]
+    return {
+        "id": "hearing_check",
+        "name": "hearing check",
+        "path": "`hear-check`: a voice says six random digits, the agent reports what it heard, the tool marks it",
+        "state": "ready" if syn else "missing",
+        "facts": facts,
+        "adds": HEARING_ADDS,
+        "without": HEARING_LACKS,
+        "run_time": "making the check's sound takes about a second; marking an answer about a third of a second",
+        "cost": [],
+        "prepare": [],
+        "run_with": None,
+        "remove": [],
+        "other_ways": "none in the tool: it cannot hear; hearing is the agent's model's own",
+    }
+
+
+def hearing_for_video(info):
+    return "the video has no audio track: there is nothing to hear" if not info["has_audio"] else None
+
+
+def sound_line(hearing):
+    """The sentence riffsheet.md gives near its top on whether what the sound is was judged."""
+    st = hearing["state"]
+    if st == "passed":
+        return (
+            "Heard by the agent, which passed the hearing check for this analysis: what it says the sound is "
+            "(music, voices, sound effects) is marked heard by the agent. Times and loudness are measured by the tool."
+        )
+    why = {
+        "failed": "this agent did not pass the hearing check",
+        "cannot_hear": "this agent cannot hear (at the hearing check it said it cannot open sound)",
+        "not_taken": "no hearing check was taken for this analysis",
+    }[st]
+    return (
+        f"Not judged: {why}, so nothing here says what the sound is (music, tone of voice, sound effects). "
+        "Times and loudness are measured by the tool."
+    )
+
+
+CAPABILITIES = (
+    (speech_status, speech_for_video),
+    (hearing_status, hearing_for_video),
+)  # (status, plain exclusion for a video) per capability
 # what `check` covers, said at its end: its knowledge is this closed list
 COVERS = (
-    "This report covers ffmpeg and the tool's own speech recognition path (faster-whisper with the {model} "
-    "model, in this Python or in {venv}). It knows nothing about other tools on this machine or elsewhere "
-    "(other speech recognizers, models or services): whether one would serve this analysis is for the agent "
-    "to judge, and anything it costs the person is for the person to agree to."
+    "This report covers ffmpeg, the tool's own speech recognition path (faster-whisper with the {model} "
+    "model, in this Python or in {venv}) and whether the hearing check can be made here. It knows nothing "
+    "about other tools on this machine or elsewhere (other speech recognizers, models or services): whether "
+    "one would serve this analysis is for the agent to judge, and anything it costs the person is for the "
+    "person to agree to."
 )
 
 
@@ -288,12 +349,10 @@ def speech_stage(info, transcript, made_by=None):
         stamp = TRANSCRIBE_STAMP.match(model) if isinstance(model, str) and not made_by else None
         if stamp:
             return {"state": "ran", "by": model, "tested": stamp.group(1) == TRANSCRIBE_MODEL}
-        by = made_by or (
-            f"{model} (as the transcript names it)"
-            if model
-            else "a transcript given to scan that does not say what made it"
-        )
-        return {"state": "ran", "by": by, "tested": False}
+        if made_by or model:
+            return {"state": "ran", "by": made_by or f"{model} (as the transcript names it)", "tested": False}
+        # nothing says what made it: whether it was the tested path is not known (tested null)
+        return {"state": "ran", "by": "a transcript given to scan that does not say what made it", "tested": None}
     if not info["has_audio"]:
         return {"state": "not_run", "why": "the video has no audio track"}
     why = speech_ready_here()
@@ -319,11 +378,19 @@ def stages_of(idx):
             sp["tested"] = bool(stamp) and stamp.group(1) == TRANSCRIBE_MODEL
         return out
     if idx.get("transcript_meta"):
-        sp = {
-            "state": "ran",
-            "by": "a transcript given to scan (a scan made before riffsheet 0.2.0 does not say what made it)",
-            "tested": False,
-        }
+        # the transcript the scan read, when it is still there, says what made it
+        try:
+            with open(idx.get("transcript") or "", encoding="utf-8") as f:
+                model = json.load(f).get("model")
+        except (OSError, ValueError, AttributeError):
+            model = None
+        sp = speech_stage(idx["facts"], {"model": model}) if isinstance(model, str) else {}
+        if sp.get("tested") is not True:
+            sp = {
+                "state": "ran",
+                "by": "a transcript given to scan (a scan made before riffsheet 0.2.0 does not say what made it)",
+                "tested": None,
+            }
     elif not idx["facts"].get("has_audio"):
         sp = {"state": "not_run", "why": "the video has no audio track"}
     else:
@@ -357,11 +424,16 @@ def stage_lines(stages, facts):
 
 
 def untested_lines(stages):
-    """One sentence per optional stage that ran by other means than the tool's tested path: the agent's own
-    choice of recognizer, model size or a transcript the person supplied."""
+    """One sentence per optional stage that ran by other means than the tool's tested path (the agent's own
+    choice of recognizer, model size or a transcript the person supplied), or by means nothing records."""
     sp = stages.get("speech_recognition") or {}
     if sp.get("state") != "ran" or sp.get("tested", True):
         return []
+    if sp["tested"] is None:
+        return [
+            f"The spoken words come from {sp['by'].rstrip('.')}: whether the tool's tested path ({TESTED_PATH}) "
+            f"made it is not known, nor whether the word accuracy measured for that path applies to it."
+        ]
     return [
         f"The spoken words were transcribed by {sp['by'].rstrip('.')}, not by the tool's tested path "
         f"({TESTED_PATH}): the word accuracy measured for that path does not apply to them."
@@ -444,7 +516,7 @@ def check_text(r):
         if c["prepare"]:
             L.append("  prepare it (the system Python is not changed):")
             L += [f"    {x}" for x in c["prepare"]]
-        if c["state"] != "ready":
+        if c["state"] != "ready" and c["run_with"]:
             L.append(f"  then run every riffsheet command with: {c['run_with']}")
         if c["remove"]:
             L.append("  to remove what preparing adds: " + "; ".join(c["remove"]))

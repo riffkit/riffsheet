@@ -5,9 +5,9 @@ import os
 import re
 import sys
 
-from . import FORMAT_VERSION
+from . import FORMAT_VERSION, util
 from .audio import sound_at_picture, sound_at_summary
-from .capabilities import stage_lines, stages_of, untested_lines
+from .capabilities import sound_line, stage_lines, stages_of, untested_lines
 from .constants import (
     DESCENDERS,
     EXIT_REFUSED,
@@ -29,6 +29,7 @@ from .details import (
     view_name,
     written_colors,
 )
+from .hearing import HEARD_ABOUT, hearing_state, listen_clips
 from .layers import _near
 from .report import fix_articles, report_md
 from .scandir import load_dir
@@ -266,6 +267,7 @@ class BuildState:
         self.slots = []
         self.meta = None
         self.own_means = []
+        self.hearing, self.heard, self.unheard = None, [], []  # unheard: statements of sound without a pass
 
     def add(self, e):
         if e["id"] in self.ids:
@@ -858,6 +860,58 @@ def build_own_means(s):
         s.own_means.append(e)
 
 
+def build_heard(s):
+    """What the sound is, as the agent heard it: only after it passed the hearing check for this analysis,
+    and each from a sound file `listen` cut. Without a pass every such statement refuses the build."""
+    if not s.idx["facts"].get("has_audio"):
+        s.hearing = {"state": "no_audio_track"}
+    else:
+        s.hearing = hearing_state(s.jj.d)
+    given = s.J.get("heard") or []
+    if not given:
+        return
+    if s.hearing["state"] != "passed":
+        why = {
+            "failed": "this agent's hearing check failed",
+            "cannot_hear": "this agent said it cannot open sound",
+            "not_taken": "no hearing check was answered for this analysis",
+            "no_audio_track": "the video has no audio track",
+        }[s.hearing["state"]]
+        for k, x in enumerate(given):
+            text = str(x.get("text") if isinstance(x, dict) else x)
+            s.unheard.append(f"heard[{k}] ({text[:60]}): {why}")
+        return
+    clips = listen_clips(s.jj.d)
+    for k, x in enumerate(given):
+        if not isinstance(x, dict) or not str(x.get("text") or "").strip():
+            s.problems.append(f'heard[{k}]: give each as {{"clip": NAME, "about": ..., "text": "..."}}')
+            continue
+        span = clips.get(x.get("clip"))
+        if not span:
+            s.problems.append(
+                f"heard[{k}]: clip '{x.get('clip')}' is not a sound file `listen` cut in this scan folder "
+                f"({', '.join(sorted(clips)) or 'none yet: run listen'})"
+            )
+            continue
+        if x.get("about") not in HEARD_ABOUT:
+            s.problems.append(f"heard[{k}]: 'about' is one of {', '.join(HEARD_ABOUT)}")
+            continue
+        tr = [round(s.jj.t(v, f"heard[{k}]"), 3) for v in x.get("time") or span]
+        if len(tr) != 2 or tr[0] < span[0] - EDGE_TOL_S or tr[1] > span[1] + EDGE_TOL_S or tr[1] <= tr[0]:
+            s.problems.append(f"heard[{k}]: time {tr} lies outside the clip it was heard in ({span[0]}–{span[1]} s)")
+            continue
+        s.heard.append(
+            {
+                "id": f"h{len(s.heard) + 1}",
+                "time_range": tr,
+                "about": x["about"],
+                "text": str(x["text"]).strip(),
+                "clip": x["clip"],
+                "_src": {"text": "heard"},
+            }
+        )
+
+
 def check_measured_colors(s):
     """A color written in a confirmed statement that no `color` measurement of that moment could be:
     the cheap mismatch the tool can see (the reading itself stays the agent's)."""
@@ -1152,6 +1206,7 @@ STAGES = (
     check_voiceover_in_summary,
     check_no_speech_claims,
     build_own_means,
+    build_heard,
     check_measured_colors,
     build_slots,
     check_cuts_named,
@@ -1213,7 +1268,7 @@ def analysis_of(s, d, out_dir):
     return {
         "format_version": FORMAT_VERSION,
         "prose": s.prose,
-        "audio": {"voice_segments": s.vsegs},
+        "audio": {"voice_segments": s.vsegs, "heard": s.heard},
         "scene_entities": s.ents,
         "slots": s.slots,
         "metadata": s.meta,
@@ -1222,6 +1277,7 @@ def analysis_of(s, d, out_dir):
             "method": "riffsheet build",
             "scan": os.path.relpath(d, out_dir),
             "stages": stages_of(idx),
+            "hearing": s.hearing,
             "tags": "untagged = seen; _src lists measured fields and exceptions only",
             "cuts": s.cuts,
             "non_cut_changes": [
@@ -1253,6 +1309,14 @@ def write_outputs(s, analysis, out_dir):
             if os.path.exists(f):
                 os.remove(f)
 
+    if s.unheard:
+        remove_earlier()
+        print(
+            f"build: REFUSED, nothing written to {out_dir}: {len(s.unheard)} statement(s) of what the sound is, "
+            f"and this agent has not passed the hearing check for this analysis. Take it ({util.CMD} hear-check "
+            f"DIR), or remove them: without a pass, what the sound is stays not judged."
+        )
+        return
     if s.unconfirmed:
         remove_earlier()
         print(
@@ -1298,6 +1362,8 @@ def print_report(s):
         print("NOT IN THIS ANALYSIS: " + line + " riffsheet.md says so under its first line.")
     for line in untested_lines(stages_of(s.idx)):
         print("OUTSIDE THE TESTED PATH: " + line + " riffsheet.md says so under its first line.")
+    if s.hearing and s.hearing["state"] != "no_audio_track":
+        print(f"SOUND: {sound_line(s.hearing)} riffsheet.md says so near the top.")
     if s.line_facts:
         print("LINES (measured: pace band to use in prose; cut crossings; low-probability words)")
         print("\n".join(s.line_facts))
@@ -1320,6 +1386,10 @@ def print_report(s):
         print(f"WARNINGS ({len(s.warnings)}): look at each; they do not stop the build")
         for w in s.warnings:
             print("  - " + w)
+    if s.unheard:
+        print(f"NOT HEARD ({len(s.unheard)}): statements of what the sound is need a passed hearing check")
+        for p in s.unheard:
+            print("  - " + p)
     if s.unconfirmed:
         print(f"UNCONFIRMED ({len(s.unconfirmed)}): the analysis is not written until each is confirmed or marked ?")
         for p in s.unconfirmed:
@@ -1341,7 +1411,7 @@ def cmd_build(a):
         stage(s)
     write_outputs(s, analysis_of(s, d, out_dir), out_dir)
     print_report(s)
-    if s.unconfirmed:
+    if s.unconfirmed or s.unheard:
         sys.exit(EXIT_REFUSED)
 
 

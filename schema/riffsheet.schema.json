@@ -35,6 +35,13 @@
           "items": {
             "$ref": "#/$defs/voice_segment"
           }
+        },
+        "heard": {
+          "type": "array",
+          "description": "what the sound is, as heard by the agent after it passed the hearing check (_local.hearing); absent in files written before riffsheet 0.2.0",
+          "items": {
+            "$ref": "#/$defs/heard"
+          }
         }
       }
     },
@@ -109,6 +116,7 @@
             "enum": [
               "measured",
               "seen",
+              "heard",
               "inferred",
               "cannot_judge_locally",
               "default"
@@ -178,6 +186,62 @@
         }
       }
     },
+    "heard": {
+      "type": "object",
+      "required": [
+        "id",
+        "time_range",
+        "about",
+        "text",
+        "clip",
+        "_src"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^h[0-9]+$"
+        },
+        "time_range": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "about": {
+          "enum": [
+            "music",
+            "voice",
+            "effect",
+            "ambience",
+            "other"
+          ]
+        },
+        "text": {
+          "type": "string"
+        },
+        "clip": {
+          "type": "string",
+          "description": "the sound file `listen` cut, that the agent heard it in"
+        },
+        "_src": {
+          "type": "object",
+          "description": "where a field's value came from; untagged fields were seen by the agent",
+          "additionalProperties": {
+            "enum": [
+              "measured",
+              "seen",
+              "heard",
+              "inferred",
+              "cannot_judge_locally",
+              "default"
+            ]
+          }
+        }
+      }
+    },
     "entity": {
       "type": "object",
       "required": [
@@ -224,6 +288,7 @@
             "enum": [
               "measured",
               "seen",
+              "heard",
               "inferred",
               "cannot_judge_locally",
               "default"
@@ -511,6 +576,7 @@
             "enum": [
               "measured",
               "seen",
+              "heard",
               "inferred",
               "cannot_judge_locally",
               "default"
@@ -559,6 +625,7 @@
             "enum": [
               "measured",
               "seen",
+              "heard",
               "inferred",
               "cannot_judge_locally",
               "default"
@@ -633,7 +700,7 @@
         },
         "stages": {
           "type": "object",
-          "description": "tool-written: each optional stage (speech_recognition) and whether it ran (by: what made it; tested: whether that was the tool's tested path, `transcribe` with the small model), failed (it was there and stopped while running; why) or did not run (why); absent in files written before riffsheet 0.2.0",
+          "description": "tool-written: each optional stage (speech_recognition) and whether it ran (by: what made it; tested: whether that was the tool's tested path, `transcribe` with the small model, null when nothing says), failed (it was there and stopped while running; why) or did not run (why); absent in files written before riffsheet 0.2.0",
           "additionalProperties": {
             "anyOf": [
               {
@@ -651,7 +718,10 @@
                     "type": "string"
                   },
                   "tested": {
-                    "type": "boolean"
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   }
                 }
               },
@@ -675,6 +745,31 @@
                 }
               }
             ]
+          }
+        },
+        "hearing": {
+          "type": "object",
+          "description": "tool-written: the hearing check for this analysis. passed: the agent heard the test and its `heard` statements went out; failed, cannot_hear (the agent said it cannot open sound) or not_taken: what the sound is was not judged; no_audio_track: nothing to hear. Absent in files written before riffsheet 0.2.0",
+          "required": [
+            "state"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "state": {
+              "enum": [
+                "passed",
+                "failed",
+                "cannot_hear",
+                "not_taken",
+                "no_audio_track"
+              ]
+            },
+            "checks_answered": {
+              "type": "integer"
+            },
+            "checks_passed": {
+              "type": "integer"
+            }
           }
         },
         "tags": {

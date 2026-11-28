@@ -20,7 +20,7 @@ _STRS = {"type": "array", "items": {"type": "string"}}
 _SRC = {
     "type": "object",
     "description": "where a field's value came from; untagged fields were seen by the agent",
-    "additionalProperties": {"enum": ["measured", "seen", "inferred", "cannot_judge_locally", "default"]},
+    "additionalProperties": {"enum": ["measured", "seen", "heard", "inferred", "cannot_judge_locally", "default"]},
 }
 _NOTES = {"type": "array", "description": "free notes: corrections, uncertainties, why a value is missing"}
 _SOUND = {
@@ -83,7 +83,15 @@ ANALYSIS_SCHEMA = {
             "type": "object",
             "required": ["voice_segments"],
             "additionalProperties": False,
-            "properties": {"voice_segments": {"type": "array", "items": {"$ref": "#/$defs/voice_segment"}}},
+            "properties": {
+                "voice_segments": {"type": "array", "items": {"$ref": "#/$defs/voice_segment"}},
+                "heard": {
+                    "type": "array",
+                    "description": "what the sound is, as heard by the agent after it passed the hearing check "
+                    "(_local.hearing); absent in files written before riffsheet 0.2.0",
+                    "items": {"$ref": "#/$defs/heard"},
+                },
+            },
         },
         "scene_entities": {"type": "array", "items": {"$ref": "#/$defs/entity"}},
         "slots": {"type": "array", "items": {"$ref": "#/$defs/slot"}},
@@ -118,6 +126,19 @@ ANALYSIS_SCHEMA = {
                     },
                 },
                 "_notes": _NOTES,
+            },
+        },
+        "heard": {
+            "type": "object",
+            "required": ["id", "time_range", "about", "text", "clip", "_src"],
+            "additionalProperties": False,
+            "properties": {
+                "id": {"type": "string", "pattern": "^h[0-9]+$"},
+                "time_range": _PAIR,
+                "about": {"enum": ["music", "voice", "effect", "ambience", "other"]},
+                "text": {"type": "string"},
+                "clip": {"type": "string", "description": "the sound file `listen` cut, that the agent heard it in"},
+                "_src": _SRC,
             },
         },
         "entity": {
@@ -299,7 +320,8 @@ ANALYSIS_SCHEMA = {
                     "type": "object",
                     "description": "tool-written: each optional stage (speech_recognition) and whether it ran "
                     "(by: what made it; tested: whether that was the tool's tested path, `transcribe` with the "
-                    "small model), failed (it was there and stopped while running; why) or did not run (why); "
+                    "small model, null when nothing says), failed (it was there and stopped while running; why) or "
+                    "did not run (why); "
                     "absent in files written before riffsheet 0.2.0",
                     "additionalProperties": {
                         "anyOf": [
@@ -310,7 +332,7 @@ ANALYSIS_SCHEMA = {
                                 "properties": {
                                     "state": {"const": "ran"},
                                     "by": {"type": "string"},
-                                    "tested": {"type": "boolean"},
+                                    "tested": {"type": ["boolean", "null"]},
                                 },
                             },
                             {
@@ -323,6 +345,20 @@ ANALYSIS_SCHEMA = {
                                 },
                             },
                         ]
+                    },
+                },
+                "hearing": {
+                    "type": "object",
+                    "description": "tool-written: the hearing check for this analysis. passed: the agent heard the "
+                    "test and its `heard` statements went out; failed, cannot_hear (the agent said it cannot open "
+                    "sound) or not_taken: what the sound is was not judged; no_audio_track: nothing to hear. "
+                    "Absent in files written before riffsheet 0.2.0",
+                    "required": ["state"],
+                    "additionalProperties": False,
+                    "properties": {
+                        "state": {"enum": ["passed", "failed", "cannot_hear", "not_taken", "no_audio_track"]},
+                        "checks_answered": {"type": "integer"},
+                        "checks_passed": {"type": "integer"},
                     },
                 },
                 "tags": {"type": "string"},

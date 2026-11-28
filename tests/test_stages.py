@@ -50,8 +50,8 @@ class Check(unittest.TestCase):
         R = json.loads(r.stdout)
         self.assertEqual(R["ffmpeg"]["state"], "ready")
         self.assertEqual(R["ffmpeg"]["filters_missing"], [])
-        (sp,) = R["capabilities"]
-        self.assertEqual((sp["id"], sp["state"]), ("speech_recognition", "missing"))
+        sp, hc = R["capabilities"]
+        self.assertEqual((sp["id"], sp["state"], hc["id"]), ("speech_recognition", "missing", "hearing_check"))
         # facts only: no verdict on whether this video needs it
         self.assertNotIn("verdict", R)
         self.assertNotIn("not_for_this_video", sp)
@@ -150,7 +150,7 @@ class Stages(unittest.TestCase):
         d = clips.scan("main", "--transcript", CLIPS["main_transcript"])
         sp = index(d)["stages"]["speech_recognition"]
         self.assertEqual(
-            sp, {"state": "ran", "by": "a transcript given to scan that does not say what made it", "tested": False}
+            sp, {"state": "ran", "by": "a transcript given to scan that does not say what made it", "tested": None}
         )
         d = os.path.join(clips.WORK, "scan main transcript by")
         r = cs(
@@ -262,8 +262,9 @@ class Stages(unittest.TestCase):
         md = read(os.path.join(out, "riffsheet.md")).splitlines()
         self.assertIn("· speech not transcribed", md[2])
         self.assertNotIn("no speech", "\n".join(md))
-        self.assertTrue(md[4].startswith("**Not in this analysis.** Speech recognition did not run:"), md[4])
-        self.assertIn("whether anyone speaks is not known", md[4])
+        self.assertTrue(md[4].startswith("**Sound.** Not judged: no hearing check was taken"), md[4])
+        self.assertTrue(md[6].startswith("**Not in this analysis.** Speech recognition did not run:"), md[6])
+        self.assertIn("whether anyone speaks is not known", md[6])
 
 
 class OtherMeans(clips.MainClipCase):
@@ -276,14 +277,14 @@ class OtherMeans(clips.MainClipCase):
 
         r, out = self.build("other means", edit=edit)
         ok(self, r)
-        self.assertIn("OUTSIDE THE TESTED PATH: The spoken words were transcribed by a transcript given", r.stdout)
+        self.assertIn("OUTSIDE THE TESTED PATH: The spoken words come from a transcript given to scan", r.stdout)
         A = json.loads(read(os.path.join(out, "riffsheet.json")))
         self.assertEqual(
             A["_local"]["own_means"],
             [{"fact": "The tone is a 440 Hz sine", "used": "a spectrum of my own", "time_range": [4.0, 6.0]}],
         )
         md = read(os.path.join(out, "riffsheet.md"))
-        self.assertIn("**Outside the tool's tested path.** The spoken words were transcribed by", md)
+        self.assertIn("**Outside the tool's tested path.** The spoken words come from a transcript", md)
         self.assertIn("## Established by the agent's own means, outside the tool", md)
         self.assertIn("- The tone is a 440 Hz sine (used: a spectrum of my own; 00:04.0–00:06.0).", md)
         self.assertIn("## What the tool lacked here (recorded by the agent)\n\n- no command measures pitch", md)

@@ -32,6 +32,8 @@ rs zoom DIR --at T [--box B]                # large sharp view, for clothing, pr
 rs frames DIR --from S --to E [--box B]     # every frame of a window, for motion and order
 rs mouth DIR --box B --words A-B            # is this person saying this line (its word range)
 rs color DIR --at T --box B [--ref R]       # measured colors with plain names
+rs hear-check DIR                           # whether you can hear: a test the tool sets and marks
+rs listen DIR                               # after a pass: the sound, cut into files to open
 rs build DIR                                # the sheet your judgment is written against
 rs build DIR --judgment J.json --out OUT   # write and check the riffsheet into OUT
 ```
@@ -56,19 +58,28 @@ The tool reports facts and measures. You judge what this analysis needs and choo
 - **Which speech recognizer is your choice.** `scan` needs a word-timed transcript in the format `transcribe` writes (`references/TOOL.md`). The tool offers one tested path, `transcribe` (faster-whisper with the `small` model), and `references/TOOL.md` gives what its measurements found for it. You may use another recognizer, another model size or a transcript the person supplies; pass `--transcript-by "what made it"` to `scan` (a transcript `transcribe` made needs nothing). The riffsheet records what made the transcript, and says plainly when it was not the tool's tested path.
 - **Means outside the tool.** When you establish a fact with anything the tool does not provide (another program, a service, a source you looked up), list it in the judgment file under `own_means` with what you used: the riffsheet marks it as established by your own means. When you need something and find no way to get it, record the gap under `tool_gaps`. `riffsheet.md` shows both.
 
+## Sound: describe it only if you passed the hearing check
+
+The tool cannot hear: it measures loudness and when sound events fall, not what a sound is. Some agents run on a model that takes sound as input; most do not, and what you believe about your own abilities is not evidence. So whether you can hear is settled for this analysis by a test the tool sets and marks:
+
+1. After `scan`, when the video has an audio track: `rs hear-check DIR`. It writes a short sound file in which a voice says six digits.
+2. Open that file as sound, the way your model takes sound in, and report what you heard: `rs hear-check DIR --answer DIGITS`. If you have no way to open a sound file as sound, say so: `rs hear-check DIR --cannot-hear`. For most agents that is the honest answer, and it costs the analysis nothing.
+3. Never work the digits out by measuring the file (decoding it, a speech recognizer, a script, its waveform or spectrum): a check passed that way would make everything you later say about the sound an invention.
+4. After a pass, `rs listen DIR` cuts the video's sound around each measured sound event, and the whole track when the video is short, into files: open them as sound, and write what you hear under `heard` in the judgment file (`references/METHOD.md`, section 6). Each statement goes out marked heard by the agent. The sound then reaches your model provider as the pictures do. Without a pass, `build` refuses such statements, and what the sound is stays not judged.
+
 ## How to do it
 
 Follow `references/METHOD.md` from start to finish; read `references/TOOL.md` once for what each command prints and its limits. In short:
 
 1. With the tool's speech recognition: `rs transcribe VIDEO --out T.json; rs scan VIDEO --out DIR --transcript T.json && rs build DIR` (a `;` after `transcribe`: if it fails, it leaves in T.json why, and `scan` records it, so the riffsheet says the speech recognition failed and why; tell the person). Without speech recognition: `rs scan VIDEO --out DIR && rs build DIR`. With a transcript made another way: `rs scan VIDEO --out DIR --transcript T.json --transcript-by "what made it"`.
-2. Read the summary `scan` printed (no need to open `summary.txt` again), then open the overview sheets and any jump-cut sheet in one step.
+2. Read the summary `scan` printed (no need to open `summary.txt` again), then open the overview sheets and any jump-cut sheet in one step. With an audio track, take the hearing check in the same step (above).
 3. In one step, read every caption region with `text`, measure every graphic with `element`, and take the `zoom`, `frames`, `mouth` and `color` views the overview calls for. A full-frame end card over a still picture gets its times from `element` but no box: give that box by eye.
 4. Write the judgment file, taking pace words from the PACE block of the step 1 sheet and wrapping every statement that uses a word from its DETAIL WORDS list, and run `build DIR --judgment J.json --out OUT`.
 5. For every statement it lists, open a large view of that moment, compare your words with it, and name the view in the statement's mark; rebuild until it prints `CHECKS: all passed`. Until then it writes no riffsheet. `build` checks that each statement names a close view of its moment; whether the words match the picture is yours to check.
 
 Batch independent commands and images into one step: each step costs a full re-read of the conversation.
 
-Then report to the person (below), and say what the analysis lacks: anything that did not run or ran by other means (the paragraphs under the first line of `riffsheet.md`), and what it could not judge.
+Then report to the person (below), and say what the analysis lacks: anything that did not run or ran by other means, and whether the sound was heard (the paragraphs under the first line of `riffsheet.md`), and what it could not judge.
 
 ## Telling the person
 

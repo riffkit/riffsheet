@@ -14,6 +14,8 @@ says whether they are here and what getting them costs.
   mouth  DIR --box ... (--words A-B | --line N | --from S --to E)
                                                  the mouth at each word and pause (--every-frame: all)
   color  DIR --at T --box ...                    measured main colors of a box, with plain names
+  hear-check DIR [--answer DIGITS | --cannot-hear]  whether this agent can hear: a test the tool sets and marks
+  listen DIR [--from S --to E]                   after a passed hearing check: the sound, cut for listening
   build  DIR [--judgment J.json] [--out O]       no J: the measured sheet to judge against;
                                                  with J: riffsheet.json + riffsheet.md, plus checks
 
@@ -22,7 +24,8 @@ Every label shows the true timestamp of the frame it sits under (from the decode
 Runs on Python 3.9 or newer; needs ffmpeg 7.0 or newer (filter scripts are passed as -/filter_complex).
 
 Exit status: 0 done; 1 an error (one line on stderr); 2 a usage error; 3 `build` refused (statements
-without a confirming view: nothing written, the list printed under UNCONFIRMED).
+without a confirming view, or of what the sound is without a passed hearing check: nothing written, the
+list printed under UNCONFIRMED or NOT HEARD).
 """
 
 import argparse
@@ -32,6 +35,7 @@ from . import FORMAT_VERSION, VERSION
 from .build import cmd_build
 from .capabilities import cmd_check
 from .elements import cmd_element
+from .hearing import cmd_hear_check, cmd_listen
 from .scan import cmd_scan
 from .scandir import remove_scratch
 from .text import cmd_text
@@ -124,6 +128,17 @@ def main(argv=None, entry=None):
         p.add_argument("--size", type=int, help="cell long side in px")
         p.add_argument("--name")
         p.set_defaults(fn=(lambda a, m=mouth: dense(a, m)))
+    p = sub.add_parser("hear-check", help="whether this agent can hear: a sound test the tool sets and marks")
+    p.add_argument("dir")
+    g = p.add_mutually_exclusive_group()
+    g.add_argument("--answer", help="the digits you heard in the newest check file, in order")
+    g.add_argument("--cannot-hear", action="store_true", help="record that you cannot open a sound file as sound")
+    p.set_defaults(fn=cmd_hear_check)
+    p = sub.add_parser("listen", help="after a passed hearing check: the video's sound cut into files to open")
+    p.add_argument("dir")
+    p.add_argument("--from", dest="start", type=float)
+    p.add_argument("--to", dest="end", type=float)
+    p.set_defaults(fn=cmd_listen)
     p = sub.add_parser("build", help="write riffsheet.json + riffsheet.md from the scan and a judgment file")
     p.add_argument("dir")
     p.add_argument("--judgment", help="the agent's judgment JSON (omit to print the measured sheet)")

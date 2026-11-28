@@ -4,7 +4,7 @@ import json
 import os
 import re
 
-from .capabilities import stage_lines, untested_lines
+from .capabilities import sound_line, stage_lines, untested_lines
 from .util import mmss
 
 FORMAT_WORDS = {
@@ -144,6 +144,9 @@ def report_md(idx, A, J):
     title = os.path.splitext(os.path.basename(idx["video"]))[0]
     n_lines = len(A["audio"]["voice_segments"])
     L = [f"# {title}", "", headline(m, len(idx["shots"]), n_lines)]
+    hearing = A["_local"].get("hearing")
+    if hearing and hearing["state"] != "no_audio_track":  # what the sound is: heard, or not judged and why
+        L += ["", "**Sound.** " + sound_line(hearing)]
     gaps = stage_lines(A["_local"].get("stages") or {}, idx["facts"])
     if gaps:  # an optional stage that failed or did not run, said where the reader starts
         L += ["", "**Not in this analysis.** " + " ".join(gaps)]
@@ -192,6 +195,17 @@ def report_md(idx, A, J):
                     what = (what + ": " if what else "") + ", ".join(f"“{x}”" for x in said)
                 if what:
                     shown.append(f"{what} ({mmss(a_)}–{mmss(b_)})")
+        heard = [h for h in A["audio"].get("heard") or [] if t0 - 0.05 <= h["time_range"][0] < t1 - 0.05]
+        if heard:  # what the agent heard, after it passed the hearing check
+            L += [
+                "**Heard by the agent.** "
+                + "; ".join(
+                    f"{mmss(h['time_range'][0])}–{mmss(h['time_range'][1])}, {h['about']}: {h['text'].rstrip('.')}"
+                    for h in heard
+                )
+                + ".",
+                "",
+            ]
         if shown:
             L += ["Also on screen: " + "; ".join(shown) + ".", ""]
         if spoken:
