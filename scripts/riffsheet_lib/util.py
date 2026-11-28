@@ -31,6 +31,31 @@ def die(msg, code=1):
     raise SystemExit(code)
 
 
+def this_python():
+    """The Python running the tool, as a record names it: its version, not its path (a path in a home
+    folder names the person)."""
+    return "Python " + ".".join(map(str, sys.version_info[:3]))
+
+
+def private(text):
+    """`text` with this person's home folder written as ~, for files meant to be shared (riffsheet.json and
+    riffsheet.md): a path can reach them in a stage's reason, an error message or the agent's own words."""
+    home = os.path.expanduser("~").rstrip(os.sep)
+    for h in sorted({home, os.path.realpath(home)}, key=len, reverse=True):
+        if len(h) > 1:
+            text = re.sub(re.escape(h) + r"(?![\w.-])", "~", text)
+    return text
+
+
+def private_doc(x):
+    """A JSON document with private() applied to every string in it, keys included."""
+    if isinstance(x, dict):
+        return {private(k): private_doc(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [private_doc(v) for v in x]
+    return private(x) if isinstance(x, str) else x
+
+
 def warn(msg):
     sys.stderr.write("riffsheet: warning: " + msg + "\n")
 

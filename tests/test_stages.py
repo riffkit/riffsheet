@@ -4,6 +4,7 @@ import json
 import os
 import re
 import shlex
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -301,6 +302,50 @@ class OtherMeans(clips.MainClipCase):
             ok(self, r)
             self.assertIn(needle, r.stdout)
             self.assertNotIn("\n- n\n", read(os.path.join(out, "riffsheet.md")))
+
+
+class NoHomeFolder(clips.MainClipCase):
+    """Nothing the tool writes into riffsheet.json or riffsheet.md names the person: no home folder, by
+    which a user name travels, whatever path reaches them."""
+
+    def test_records_name_the_python_by_version(self):
+        saved = caps.importlib.util.find_spec
+        caps.importlib.util.find_spec = lambda name: None
+        try:
+            why = caps.speech_ready_here()
+        finally:
+            caps.importlib.util.find_spec = saved
+        self.assertNotIn(sys.executable, why)
+        self.assertIn("(Python %d.%d.%d)" % sys.version_info[:3], why)
+
+    def test_a_path_in_the_home_folder_goes_out_as_tilde(self):
+        home = os.path.dirname(clips.WORK)  # the home folder, as far as the build below knows
+        d = os.path.join(clips.WORK, "scan private")
+        shutil.copytree(self.d, d)
+        p = os.path.join(d, "index.json")
+        idx = json.loads(read(p))
+        idx["stages"]["speech_recognition"] = {
+            "state": "failed",
+            "why": f"faster-whisper stopped: no model in {home}/models/small",
+        }
+        with open(p, "w", encoding="utf-8") as f:
+            json.dump(idx, f)
+
+        def edit(j):
+            j["own_means"] = [{"fact": "The tone is a 440 Hz sine", "used": f"a spectrum from {home}/bin/spec"}]
+
+        j = judgment("Bars stand still.", *self.ids)
+        edit(j)
+        jp = os.path.join(clips.WORK, "private.json")
+        with open(jp, "w", encoding="utf-8") as f:
+            json.dump(j, f)
+        out = os.path.join(clips.WORK, "build private")
+        ok(self, cs("build", d, "--judgment", jp, "--out", out, env=dict(os.environ, HOME=home)))
+        for name in ("riffsheet.json", "riffsheet.md"):
+            text = read(os.path.join(out, name))
+            self.assertNotIn(home, text, name)
+            self.assertIn("~/models/small", text, name)
+            self.assertIn("~/bin/spec", text, name)
 
 
 class Words(unittest.TestCase):

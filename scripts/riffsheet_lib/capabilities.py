@@ -24,6 +24,7 @@ from .constants import FFMPEG_MIN_MAJOR
 from .hearing import SYNTHESIZERS, synthesizer
 from .media import probe
 from .transcript import TRANSCRIBE_MODEL
+from .util import this_python
 
 # Every ffmpeg filter (and the one lavfi source, color) the tool's commands use. A build of ffmpeg without
 # one of them fails on the command that needs it, so `check` names any that are missing. drawtext is the
@@ -179,7 +180,7 @@ def speech_ready_here():
     """Why speech recognition cannot run under this Python, or None when it can: the reason scan records
     when it is given no transcript."""
     if importlib.util.find_spec("faster_whisper") is None:
-        return f"the faster-whisper package is not installed for the Python that ran the analysis ({sys.executable})"
+        return f"the faster-whisper package is not installed for the Python that ran the analysis ({this_python()})"
     if not speech_model_on_disk():
         return f"the speech model ({TRANSCRIBE_MODEL}) is not on this machine"
     return None

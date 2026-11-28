@@ -35,7 +35,7 @@ from .report import fix_articles, report_md
 from .scandir import load_dir
 from .schema import ANALYSIS_SCHEMA, validate
 from .transcript import counts_by_character, is_unspaced_script, join_words
-from .util import die, fmt_t, mmss, read_json, weighted_median, write_json, write_text
+from .util import die, fmt_t, mmss, private, private_doc, read_json, weighted_median, write_json, write_text
 
 PAUSE_LISTED_S = 0.4  # pauses longer than this are listed with a line's pace (a breath, not a word gap)
 TREND_MIN_WORDS = 7  # a speed-up or slow-down is judged only on lines this long: halves of 3+ words each
@@ -1415,6 +1415,8 @@ def write_outputs(s, analysis, out_dir):
             f"as {{words|zoom_image_name}}, or as {{words|?}} to send them out tagged uncertain."
         )
         return
+    # files meant to be shared: no home folder in them (it names the person)
+    analysis = private_doc(analysis)
     # the file goes out only in the documented format: check it as it will be read back
     bad = validate(json.loads(json.dumps(analysis)), ANALYSIS_SCHEMA)
     if bad:
@@ -1424,7 +1426,7 @@ def write_outputs(s, analysis, out_dir):
             f"{len(bad)} problem(s): " + "; ".join(bad[:8]) + (" ..." if len(bad) > 8 else "")
         )
     write_json(outs[0], analysis, indent=1, ensure_ascii=False)
-    write_text(outs[1], report_md(s.idx, analysis, s.J))
+    write_text(outs[1], private(report_md(s.idx, analysis, s.J)))
     print(f"build: {out_dir}/riffsheet.json and riffsheet.md ({len(s.confirmed)} detail statement(s) confirmed)")
 
 

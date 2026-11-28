@@ -6,7 +6,7 @@ import sys
 import time
 
 from .media import check_video_path, run
-from .util import die, read_json, write_json
+from .util import die, read_json, this_python, write_json
 
 
 # ----------------------------------------------------------------------------- transcript
@@ -189,7 +189,7 @@ def cmd_transcribe(a):
         stop(
             a.out,
             "not_run",
-            f"the faster-whisper package is not installed for the Python that ran transcribe ({sys.executable})",
+            f"the faster-whisper package is not installed for the Python that ran transcribe ({this_python()})",
             f"transcribe needs the faster-whisper package, which is not importable by this Python "
             f"({sys.executable}). `check` says what installing it costs and prints the commands that put it "
             f"in a virtual environment of its own; then run riffsheet with that environment's Python, for this "
