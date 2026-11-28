@@ -594,6 +594,12 @@
  "_local": {
   "method": "riffsheet build",
   "scan": "../scan",
+  "stages": {
+   "speech_recognition": {
+    "state": "ran",
+    "by": "faster-whisper small (int8, cpu)"
+   }
+  },
   "tags": "untagged = seen; _src lists measured fields and exceptions only",
   "cuts": [
    2.375,
