@@ -2,6 +2,8 @@
 
 12.042 s · 5 shots · one picture at a time · no speech · on-screen text in en
 
+**Sound.** Not judged: no hearing check was taken for this analysis, so nothing here says what the sound is (music, tone of voice, sound effects). Times and loudness are measured by the tool.
+
 Sound and picture (measured times, not what the sound is): 4 of 4 cuts land on a loudness peak or rise (within 0.052 s); about 0.9 would by chance, with 17 peaks and rises in 12.0 s; 0 of 1 caption appearances land on a loudness peak or rise (within 0.052 s); about 0.1 would by chance, with 17 peaks and rises in 12.0 s.
 
 ## What happens
@@ -74,3 +76,10 @@ Also on screen: “can't tonight, way too much going on” (00:00.0–00:04.0).
 
 - the main person: In the wide shots from 00:06.4 her face is small and reads slightly different from the close views; the edit presents one woman, and the large views do not settle it.
 - 00:07.8–00:12.0: The still share falls to 0.12 in the last second; the sampled frames show her nearing with the background in place, so whether the camera starts to move there is not settled.
+
+## What the tool lacked here (recorded by the agent)
+
+- Text-like regions R1-R4 were all marked MOTION ONLY? and their boxes show no lettering on any overview cell (they cover her moving body and the walk), so they were skipped.
+- The top caption was not found as a fixed layer (only 4 of 12 one-second blocks had a moving picture to test against); its box was taken from the overview and read with text --name top_caption.
+- The text command measured the caption's fill as #76ACDA and its box as 0.028-0.082 wide, both from motion evidence; the image shows centered white lettering, so color and position were given from the reading.
+- The detected cuts at 7.292 and 7.792 are flash frames (measured lighter than both neighbors) over an unchanged framing; they are named as flashes.

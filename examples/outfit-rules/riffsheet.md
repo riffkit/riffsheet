@@ -2,6 +2,8 @@
 
 8.042 s · 4 shots · one picture at a time · spoken on camera (es) · 5 spoken lines
 
+**Sound.** Not judged: no hearing check was taken for this analysis, so nothing here says what the sound is (music, tone of voice, sound effects). Times and loudness are measured by the tool.
+
 Sound and picture (measured times, not what the sound is): 0 of 3 cuts land on a loudness peak or rise (within 0.052 s); about 0.4 would by chance, with 11 peaks and rises in 8.0 s; 4 of 5 caption appearances land on a loudness peak or rise (within 0.052 s); about 0.7 would by chance, with 11 peaks and rises in 8.0 s.
 
 ## What happens
@@ -70,3 +72,9 @@ Captions of the spoken words: “acuérdate...” (00:00.0–00:08.0); “holgad
 ## Marked uncertain
 
 - 00:06.2–00:08.0: the sweatshirt print's lettering is only partly legible: a blue arc at the top is unreadable and the large yellow-orange letters look like CEIANID
+
+## What the tool lacked here (recorded by the agent)
+
+- F1 (0.78,0.02,1.00,1.00) is the white door frame at the right edge and F3 (0.02,0.80,0.18,0.86) the edge of the pouf and floor at the left: no lettering or drawn shape on any overview cell, so `text` was not run on them.
+- R1 (0.02,0.10,0.98,1.00) covers the whole figure; the two captions inside it were read with tighter boxes (cap, top) instead.
+- The first element command on the first check mark (box 0.38,0.44,0.62,0.58) caught the caption too; a tighter box measured it.

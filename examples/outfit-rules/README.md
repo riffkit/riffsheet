@@ -6,7 +6,7 @@ A video of ours: a young woman faces the camera in a sunny white room and, in fo
 
 A coding agent that had never seen the project followed `SKILL.md` with the code in this repository, starting from the video file alone. It took about 6 minutes, 41 commands and 20 images opened. Nothing it wrote was edited.
 
-The agent ran on a file called `video.mp4`, and the report's heading is taken from the file name. The result here was rebuilt from the same video named `outfit-rules.mp4`, by replaying its commands in order (`commands.txt`) with its judgment file unchanged (`judgment.json`). The rebuilt `riffsheet.md` and `riffsheet.json` are identical to the agent's except for the heading. In `commands.txt`, `rs` stands for the tool as `SKILL.md` defines it, and folders are written relative to the video's folder.
+The agent ran on a file called `video.mp4`, and the report's heading is taken from the file name. The result here was rebuilt from the same video named `outfit-rules.mp4`, by replaying its commands in order (`commands.txt`) with its judgment file unchanged (`judgment.json`). The rebuilt `riffsheet.md` and `riffsheet.json` were identical to the agent's except for the heading. With riffsheet 0.2.0, `riffsheet.md` also says near its top that the sound was not judged (no hearing check was taken in that run) and lists, in a section of its own, what the agent recorded as missing from the tool; `riffsheet.json` records how each optional stage ran and that no hearing check was taken. In `commands.txt`, `rs` stands for the tool as `SKILL.md` defines it, and folders are written relative to the video's folder.
 
 | file | what it is |
 |---|---|

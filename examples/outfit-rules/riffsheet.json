@@ -131,7 +131,8 @@
      "transcript 'olado,' -> 'holgado,' (seen in a word-for-word caption)"
     ]
    }
-  ]
+  ],
+  "heard": []
  },
  "scene_entities": [
   {
@@ -597,8 +598,14 @@
   "stages": {
    "speech_recognition": {
     "state": "ran",
-    "by": "faster-whisper small (int8, cpu)"
+    "by": "faster-whisper small (int8, cpu)",
+    "tested": true
    }
+  },
+  "hearing": {
+   "state": "not_taken",
+   "checks_answered": 0,
+   "checks_passed": 0
   },
   "tags": "untagged = seen; _src lists measured fields and exceptions only",
   "cuts": [
@@ -767,6 +774,7 @@
    "R1 (0.02,0.10,0.98,1.00) covers the whole figure; the two captions inside it were read with tighter boxes (cap, top) instead.",
    "The first element command on the first check mark (box 0.38,0.44,0.62,0.58) caught the caption too; a tighter box measured it."
   ],
+  "own_means": [],
   "followups": [
    {
     "cmd": "text",
