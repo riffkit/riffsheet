@@ -298,15 +298,20 @@ ANALYSIS_SCHEMA = {
                 "stages": {
                     "type": "object",
                     "description": "tool-written: each optional stage (speech_recognition) and whether it ran "
-                    "(by: what made it), failed (why) or did not run (why); absent in files written before "
-                    "riffsheet 0.2.0",
+                    "(by: what made it; tested: whether that was the tool's tested path, `transcribe` with the "
+                    "small model), failed (it was there and stopped while running; why) or did not run (why); "
+                    "absent in files written before riffsheet 0.2.0",
                     "additionalProperties": {
                         "anyOf": [
                             {
                                 "type": "object",
                                 "required": ["state", "by"],
                                 "additionalProperties": False,
-                                "properties": {"state": {"const": "ran"}, "by": {"type": "string"}},
+                                "properties": {
+                                    "state": {"const": "ran"},
+                                    "by": {"type": "string"},
+                                    "tested": {"type": "boolean"},
+                                },
                             },
                             {
                                 "type": "object",
@@ -367,7 +372,18 @@ ANALYSIS_SCHEMA = {
                     },
                 },
                 "cannot_judge_locally": {},
-                "tool_gaps": {},
+                "tool_gaps": {"description": "the agent's record of what the tool lacked for this analysis"},
+                "own_means": {
+                    "type": "array",
+                    "description": "facts the agent established by means the tool does not provide, each with "
+                    "what it used (absent in files written before riffsheet 0.2.0)",
+                    "items": {
+                        "type": "object",
+                        "required": ["fact", "used"],
+                        "additionalProperties": False,
+                        "properties": {"fact": {"type": "string"}, "used": {"type": "string"}, "time_range": _PAIR},
+                    },
+                },
                 "followups": {
                     "type": "array",
                     "items": {

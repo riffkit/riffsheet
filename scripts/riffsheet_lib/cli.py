@@ -4,7 +4,7 @@ Needs ffmpeg + ffprobe on PATH and the Python standard library. No network. Only
 `transcribe` command needs a package (faster-whisper) and a speech model on this machine; `check`
 says whether they are here and what getting them costs.
 
-  check  [VIDEO] [--json]                        what this machine can do, and what this video needs (run first)
+  check  [VIDEO] [--json]                        facts: what this machine has for an analysis (no network)
   transcribe VIDEO --out T.json [--hint TEXT]    word-timed transcript (optional; needs faster-whisper)
   scan   VIDEO --out DIR [--transcript T.json]   everything up front (run first)
   text   DIR --box x0,y0,x1,y1 [--from S --to E] each distinct state of a region, once, with on/off times
@@ -52,7 +52,7 @@ def main(argv=None, entry=None):
     )
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("check", help="what this machine can do for an analysis (no network)")
-    p.add_argument("video", nargs="?", help="a video: also say which optional pieces matter for it")
+    p.add_argument("video", nargs="?", help="a video: also report its length and whether it has an audio track")
     p.add_argument("--json", action="store_true", help="the report as JSON")
     p.set_defaults(fn=cmd_check)
     p = sub.add_parser("transcribe", help="word-timed transcript (needs faster-whisper; optional)")
@@ -69,6 +69,10 @@ def main(argv=None, entry=None):
     p.add_argument("video")
     p.add_argument("--out", required=True)
     p.add_argument("--transcript", help="faster-whisper style JSON (segments[].words[] start/end/word)")
+    p.add_argument(
+        "--transcript-by",
+        help="what made the transcript, when it was not `transcribe` (a recognizer and model, or the person)",
+    )
     p.set_defaults(fn=cmd_scan)
     p = sub.add_parser("text", help="distinct states of a region with on/off times")
     p.add_argument("dir")

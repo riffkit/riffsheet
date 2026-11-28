@@ -1,9 +1,10 @@
 """riffsheet.md: the plain-words report."""
 
+import json
 import os
 import re
 
-from .capabilities import stage_lines
+from .capabilities import stage_lines, untested_lines
 from .util import mmss
 
 FORMAT_WORDS = {
@@ -146,6 +147,9 @@ def report_md(idx, A, J):
     gaps = stage_lines(A["_local"].get("stages") or {}, idx["facts"])
     if gaps:  # an optional stage that failed or did not run, said where the reader starts
         L += ["", "**Not in this analysis.** " + " ".join(gaps)]
+    other = untested_lines(A["_local"].get("stages") or {})
+    if other:  # a stage that ran by the agent's choice of means, not the tool's tested path
+        L += ["", "**Outside the tool's tested path.** " + " ".join(other)]
     sp = A["_local"].get("sound_at_picture")
     if sp:  # measured coincidence of sound events with cuts and caption appearances (times, not hearing)
         parts = [g["summary"] for g in (sp["cuts"], sp["captions"]) if g["changes"]]
@@ -228,6 +232,17 @@ def report_md(idx, A, J):
         unc += [f"{mmss(p['window'][0])}–{mmss(p['window'][1])}: {x}" for x in p.get("claims", {}).get("uncertain", [])]
     if unc:
         L += ["", "## Marked uncertain", ""] + [f"- {x}" for x in merge_items(unc, keep_order=True)]
+    own = A["_local"].get("own_means") or []
+    if own:
+        L += ["", "## Established by the agent's own means, outside the tool", ""] + [
+            f"- {fix_articles(x['fact'].rstrip('.'))} (used: {x['used'].rstrip('.')}"
+            + (f"; {mmss(x['time_range'][0])}–{mmss(x['time_range'][1])}" if x.get("time_range") else "")
+            + ")."
+            for x in own
+        ]
+    gaps_ = [x if isinstance(x, str) else json.dumps(x, ensure_ascii=False) for x in A["_local"].get("tool_gaps") or []]
+    if gaps_:
+        L += ["", "## What the tool lacked here (recorded by the agent)", ""] + [f"- {x}" for x in gaps_]
     if A["_local"]["checks"] != "all passed":
         L += ["", "## Open checks", ""] + [f"- {_readable(x, names, lines, set(names))}" for x in A["_local"]["checks"]]
     return "\n".join(L) + "\n"

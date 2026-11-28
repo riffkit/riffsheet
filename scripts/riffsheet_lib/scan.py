@@ -17,7 +17,7 @@ from .audio import (
     sound_at_picture,
     sound_at_summary,
 )
-from .capabilities import STAGE_RECORDS, stage_lines, stages_of
+from .capabilities import STAGE_RECORDS, stage_lines, stages_of, untested_lines
 from .constants import LONG_VIDEO_S, REGION_SETTLE_MIN, STILL_LOCKED, STILL_MOVING
 from .elements import element_candidates, element_line, element_record, find_panes
 from .media import extract_cells, probe, run, run_timeout_for, set_timeout
@@ -332,7 +332,9 @@ def cmd_scan(a):
     # inputs are checked before the output folder is made, so a bad input leaves nothing behind
     info = probe(video)
     words, tmeta = load_words(a.transcript)
-    stages = {k: record(info, tmeta) for k, record in STAGE_RECORDS.items()}
+    if a.transcript_by and not a.transcript:
+        die("--transcript-by says what made the transcript given with --transcript; there is none")
+    stages = {k: record(info, tmeta, a.transcript_by) for k, record in STAGE_RECORDS.items()}
     if tmeta and tmeta.get("stage"):  # transcribe's record of why it made no transcript: no words in it
         tmeta = None
     set_timeout(run_timeout_for(info["duration_s"]))
@@ -416,6 +418,8 @@ def summary_text(ix, out):
     tm = ix.get("transcript_meta")
     if tm:
         L.append(f"transcript: {tm['words']} words, {len(tm['lines'])} lines, language {tm['language']}")
+    for line in untested_lines(stages_of(ix)):
+        L.append("TRANSCRIPT: " + line)
     heard = stages_of(ix)["speech_recognition"]["state"] == "ran"  # words known: sound is set against them
     for line in stage_lines(stages_of(ix), f):
         L.append("NOT IN THIS SCAN: " + line + " `check VIDEO` says what it needs.")

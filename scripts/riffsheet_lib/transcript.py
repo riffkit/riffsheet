@@ -214,10 +214,12 @@ def cmd_transcribe(a):
             else download_model(a.model, local_files_only=not a.download, cache_dir=a.model_dir)
         )
     except Exception as e:  # the hub raises its own error types (no network, no such model, no cache)
-        how = "could not be fetched" if a.download else "is not on this machine"
+        # not there is "did not run", even when fetching it was tried: "failed" is kept for a recognizer
+        # that was there and stopped while running
+        how = "is not on this machine, and fetching it failed" if a.download else "is not on this machine"
         stop(
             a.out,
-            "failed" if a.download else "not_run",
+            "not_run",
             f"the speech model ({a.model}) {how} ({type(e).__name__})",
             f"model {a.model!r} {how} ({type(e).__name__}). "
             + (

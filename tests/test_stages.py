@@ -52,31 +52,49 @@ class Check(unittest.TestCase):
         self.assertEqual(R["ffmpeg"]["filters_missing"], [])
         (sp,) = R["capabilities"]
         self.assertEqual((sp["id"], sp["state"]), ("speech_recognition", "missing"))
-        self.assertEqual(sp["for_this_video"]["needed"], True)
-        # the package and the model, each with its measured size and the network
+        # facts only: no verdict on whether this video needs it
+        self.assertNotIn("verdict", R)
+        self.assertNotIn("not_for_this_video", sp)
+        # the package and the model, each with its measured size, time, the network and nothing sent
         self.assertEqual([c["download_mb"] for c in sp["cost"]], [caps.SPEECH_PACKAGE_DOWNLOAD_MB, 486])
-        self.assertTrue(all(c["network"] for c in sp["cost"]))
+        self.assertTrue(all(c["network"] and not c["sends_media"] and c["time"] for c in sp["cost"]))
         venv = os.path.join(home, ".riffsheet", "venv")
         vpy = shlex.quote(os.path.join(venv, "bin", "python"))
         self.assertIn("-m venv " + shlex.quote(venv), sp["prepare"][0])
         self.assertEqual(sp["prepare"][1], f"{vpy} -m pip install faster-whisper")
         self.assertTrue(sp["prepare"][2].endswith("transcribe VIDEO --out T.json --download"), sp["prepare"])
         self.assertTrue(sp["prepare"][2].startswith(f"{vpy} -I "), sp["prepare"])
-        self.assertIn("matters for this video", R["verdict"])
-        self.assertIn("Ask the person", R["verdict"])
+        # removing takes away what preparing adds: the environment and the model
+        self.assertEqual(len(sp["remove"]), 2)
+        self.assertIn("knows nothing about other tools", R["covers"])
         # the same as text
         r = without_faster_whisper("check", CLIPS["main"], env=env)
         ok(self, r)
-        self.assertIn("speech recognition (optional): MISSING", r.stdout)
-        self.assertIn("for this video: needed", r.stdout)
+        self.assertIn("speech recognition (optional; the tool's tested path", r.stdout)
+        self.assertIn("): MISSING", r.stdout)
         self.assertIn(f"about {caps.SPEECH_PACKAGE_DOWNLOAD_MB} MB to download", r.stdout)
-        self.assertIn("VERDICT: ", r.stdout)
+        self.assertIn("sends no audio or video anywhere", r.stdout)
+        self.assertNotIn("VERDICT", r.stdout)
+        self.assertNotIn("needed", r.stdout)
+        self.assertTrue(r.stdout.rstrip().endswith(R["covers"]), r.stdout[-300:])
 
-    def test_no_audio_track_needs_no_speech(self):
+    def test_no_audio_track_is_a_plain_exclusion(self):
         _, env = empty_home()
         R = json.loads(without_faster_whisper("check", CLIPS["split"], "--json", env=env).stdout)
-        self.assertEqual(R["capabilities"][0]["for_this_video"]["needed"], False)
-        self.assertTrue(R["verdict"].startswith("ready for this video"), R["verdict"])
+        self.assertEqual(
+            R["capabilities"][0]["not_for_this_video"], "the video has no audio track: there is nothing to transcribe"
+        )
+
+    def test_removing_lists_only_what_preparing_adds(self):
+        home, env = empty_home()
+        snap = os.path.join(home, "hf", "hub", "models--Systran--faster-whisper-small", "snapshots", "abc")
+        os.makedirs(snap)
+        with open(os.path.join(snap, "model.bin"), "wb") as f:
+            f.write(b"0" * 1000)
+        sp = json.loads(without_faster_whisper("check", "--json", env=env).stdout)["capabilities"][0]
+        # the model is here: preparing downloads only the package, and removing deletes only its environment
+        self.assertEqual([c["download_mb"] for c in sp["cost"]], [caps.SPEECH_PACKAGE_DOWNLOAD_MB])
+        self.assertEqual(sp["remove"], ["rm -rf " + shlex.quote(os.path.join(home, ".riffsheet", "venv"))])
 
     def test_found_in_the_suggested_environment_and_model_in_cache(self):
         home, env = empty_home()
@@ -92,7 +110,7 @@ class Check(unittest.TestCase):
             f.write(b"0" * 1000)
         R = json.loads(without_faster_whisper("check", "--json", env=env).stdout)
         sp = R["capabilities"][0]
-        self.assertEqual((sp["state"], sp["cost"], sp["prepare"]), ("partial", [], []))
+        self.assertEqual((sp["state"], sp["cost"], sp["prepare"], sp["remove"]), ("partial", [], [], []))
         self.assertTrue(sp["run_with"].startswith(shlex.quote(os.path.join(venv, "bin", "python")) + " -I "))
         self.assertIn("installed in " + venv, sp["facts"][0])
 
@@ -131,8 +149,74 @@ class Stages(unittest.TestCase):
     def test_ran_with_a_transcript(self):
         d = clips.scan("main", "--transcript", CLIPS["main_transcript"])
         sp = index(d)["stages"]["speech_recognition"]
-        self.assertEqual(sp["state"], "ran")
-        self.assertIn("does not say how it was made", sp["by"])
+        self.assertEqual(
+            sp, {"state": "ran", "by": "a transcript given to scan that does not say what made it", "tested": False}
+        )
+        d = os.path.join(clips.WORK, "scan main transcript by")
+        r = cs(
+            "scan",
+            CLIPS["main"],
+            "--out",
+            d,
+            "--transcript",
+            CLIPS["main_transcript"],
+            "--transcript-by",
+            "whisper.cpp large-v3",
+        )
+        ok(self, r)
+        self.assertEqual(
+            index(d)["stages"]["speech_recognition"], {"state": "ran", "by": "whisper.cpp large-v3", "tested": False}
+        )
+        self.assertIn(
+            "TRANSCRIPT: The spoken words were transcribed by whisper.cpp large-v3, not by the tool's tested path",
+            r.stdout,
+        )
+        refused(self, cs("scan", CLIPS["main"], "--out", d, "--transcript-by", "x"), "--transcript-by")
+
+    def test_tested_path_is_transcribe_with_the_default_model(self):
+        info = {"has_audio": True}
+        for model, by, tested in (
+            ("faster-whisper small (int8, cpu)", None, True),
+            ("faster-whisper medium (int8, cpu)", None, False),
+            ("faster-whisper small (int8, cpu)", "the person's own transcript", False),
+            ("whisper-1", None, False),
+        ):
+            st = caps.speech_stage(info, {"model": model}, by)
+            self.assertEqual((st["state"], st["tested"]), ("ran", tested), (model, by))
+        self.assertEqual(
+            caps.speech_stage(info, {"model": "whisper-1"})["by"], "whisper-1 (as the transcript names it)"
+        )
+        # a record written while 0.2.0 was in development, without `tested`, gets it from `by`
+        old = {"stages": {"speech_recognition": {"state": "ran", "by": "faster-whisper small (int8, cpu)"}}}
+        self.assertTrue(caps.stages_of(old)["speech_recognition"]["tested"])
+
+    def test_a_recognizer_that_stops_while_running_failed(self):
+        """Present but failing at run time is `failed`, told apart from not installed (`not_run`)."""
+        t = os.path.join(clips.WORK, "t broken.json")
+        model_dir = tempfile.mkdtemp(prefix="riffsheet-model-", dir=clips.WORK)
+        argv = [TOOL, "transcribe", CLIPS["main"], "--out", t]
+        code = (
+            "import runpy, sys, types\n"
+            "np = types.ModuleType('numpy'); np.int16 = np.float32 = None\n"
+            "class A:\n"
+            "    def __init__(s, b): s.n = len(b) // 2\n"
+            "    def astype(s, t): return s\n"
+            "    def __truediv__(s, x): return s\n"
+            "    def __len__(s): return s.n\n"
+            "np.frombuffer = lambda b, t: A(b)\n"
+            "fw = types.ModuleType('faster_whisper')\n"
+            f"fw.download_model = lambda *a, **k: {model_dir!r}\n"
+            "def broken(*a, **k): raise RuntimeError('unable to open file model.bin')\n"
+            "fw.WhisperModel = broken\n"
+            "sys.modules.update(numpy=np, faster_whisper=fw)\n"
+            f"sys.argv = {argv!r}; runpy.run_path(sys.argv[0], run_name='__main__')\n"
+        )
+        r = subprocess.run([sys.executable, "-I", "-c", code], capture_output=True, text=True)
+        refused(self, r, "faster-whisper stopped with RuntimeError")
+        st = json.loads(read(t))["stage"]
+        self.assertEqual(st["state"], "failed")
+        (line,) = caps.stage_lines({"speech_recognition": st}, {"has_audio": True})
+        self.assertTrue(line.startswith("Speech recognition was there but failed while running: faster-whisper"), line)
 
     def test_no_audio_track(self):
         sp = index(clips.scan("split"))["stages"]["speech_recognition"]
@@ -182,6 +266,31 @@ class Stages(unittest.TestCase):
         self.assertIn("whether anyone speaks is not known", md[4])
 
 
+class OtherMeans(clips.MainClipCase):
+    """What the agent did by its own means, and what the tool lacked, are said in riffsheet.md."""
+
+    def test_riffsheet_says_what_came_from_elsewhere(self):
+        def edit(j):
+            j["own_means"] = [{"fact": "The tone is a 440 Hz sine", "used": "a spectrum of my own", "time": [4, "end"]}]
+            j["tool_gaps"] = ["no command measures pitch"]
+
+        r, out = self.build("other means", edit=edit)
+        ok(self, r)
+        self.assertIn("OUTSIDE THE TESTED PATH: The spoken words were transcribed by a transcript given", r.stdout)
+        A = json.loads(read(os.path.join(out, "riffsheet.json")))
+        self.assertEqual(
+            A["_local"]["own_means"],
+            [{"fact": "The tone is a 440 Hz sine", "used": "a spectrum of my own", "time_range": [4.0, 6.0]}],
+        )
+        md = read(os.path.join(out, "riffsheet.md"))
+        self.assertIn("**Outside the tool's tested path.** The spoken words were transcribed by", md)
+        self.assertIn("## Established by the agent's own means, outside the tool", md)
+        self.assertIn("- The tone is a 440 Hz sine (used: a spectrum of my own; 00:04.0–00:06.0).", md)
+        self.assertIn("## What the tool lacked here (recorded by the agent)\n\n- no command measures pitch", md)
+        r, _ = self.build("bad other means", edit=lambda j: j.update(own_means=[{"fact": "x"}]))
+        self.assertIn("own_means[0]: give each as", r.stdout)
+
+
 class Words(unittest.TestCase):
     """The wording, on hand-made state (no video)."""
 
@@ -200,7 +309,9 @@ class Words(unittest.TestCase):
     def test_stage_lines(self):
         self.assertEqual(caps.stage_lines({"speech_recognition": {"state": "ran", "by": "x"}}, {"has_audio": True}), [])
         (line,) = caps.stage_lines({"speech_recognition": {"state": "failed", "why": "it broke."}}, {"has_audio": True})
-        self.assertTrue(line.startswith("Speech recognition failed: it broke. The speech was not transcribed"), line)
+        self.assertTrue(
+            line.startswith("Speech recognition was there but failed while running: it broke. The speech was not"), line
+        )
         no_audio = {"speech_recognition": {"state": "not_run", "why": "the video has no audio track"}}
         self.assertEqual(
             caps.stage_lines(no_audio, {"has_audio": False}),

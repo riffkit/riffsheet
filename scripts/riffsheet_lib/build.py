@@ -7,7 +7,7 @@ import sys
 
 from . import FORMAT_VERSION
 from .audio import sound_at_picture, sound_at_summary
-from .capabilities import stage_lines, stages_of
+from .capabilities import stage_lines, stages_of, untested_lines
 from .constants import (
     DESCENDERS,
     EXIT_REFUSED,
@@ -265,6 +265,7 @@ class BuildState:
         self.psegs, self.prose = [], ""
         self.slots = []
         self.meta = None
+        self.own_means = []
 
     def add(self, e):
         if e["id"] in self.ids:
@@ -841,6 +842,22 @@ def check_no_speech_claims(s):
             )
 
 
+def build_own_means(s):
+    """Facts the agent established by means the tool does not provide (another program, a service, a source
+    of its own), each with what it used: they go out marked as such, never as measured or seen."""
+    s.own_means = []
+    for k, x in enumerate(s.J.get("own_means") or []):
+        if not (isinstance(x, dict) and str(x.get("fact") or "").strip() and str(x.get("used") or "").strip()):
+            s.problems.append(f'own_means[{k}]: give each as {{"fact": "...", "used": "what you used"}}')
+            continue
+        e = {"fact": str(x["fact"]).strip(), "used": str(x["used"]).strip()}
+        if x.get("time") is not None and not (isinstance(x["time"], list) and len(x["time"]) == 2):
+            s.problems.append(f"own_means[{k}]: 'time' is [start, end]")
+        elif x.get("time") is not None:
+            e["time_range"] = [round(s.jj.t(v, f"own_means[{k}]"), 3) for v in x["time"]]
+        s.own_means.append(e)
+
+
 def check_measured_colors(s):
     """A color written in a confirmed statement that no `color` measurement of that moment could be:
     the cheap mismatch the tool can see (the reading itself stays the agent's)."""
@@ -1134,6 +1151,7 @@ STAGES = (
     check_garment_color_names,
     check_voiceover_in_summary,
     check_no_speech_claims,
+    build_own_means,
     check_measured_colors,
     build_slots,
     check_cuts_named,
@@ -1214,6 +1232,7 @@ def analysis_of(s, d, out_dir):
             "dropped_as_music": music_words(s),
             "cannot_judge_locally": J.get("cannot_judge", []),
             "tool_gaps": J.get("tool_gaps", []),
+            "own_means": s.own_means,
             "followups": [
                 {k: f.get(k) for k in ("cmd", "json", "window", "box", "frames")} for f in idx.get("followups", [])
             ],
@@ -1277,6 +1296,8 @@ def print_report(s):
     )
     for line in stage_lines(stages_of(s.idx), s.idx["facts"]):
         print("NOT IN THIS ANALYSIS: " + line + " riffsheet.md says so under its first line.")
+    for line in untested_lines(stages_of(s.idx)):
+        print("OUTSIDE THE TESTED PATH: " + line + " riffsheet.md says so under its first line.")
     if s.line_facts:
         print("LINES (measured: pace band to use in prose; cut crossings; low-probability words)")
         print("\n".join(s.line_facts))
@@ -1340,6 +1361,8 @@ def build_sheet(d, idx, words, cuts):
                 f"never write that nobody speaks: whether anyone does is not known"
             )
     else:
+        for line in untested_lines(stages_of(idx)):
+            print("TRANSCRIPT: " + line)
         print(
             f"WORDS language {tm.get('language')}: index:word@start (seconds), '?' = probability < 0.5, "
             f"'|gap|' = pause of {LINE_PAUSE_S} s or more, '✂' = cut (a line of yours that crosses one: its "

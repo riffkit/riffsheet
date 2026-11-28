@@ -15,7 +15,7 @@ Output, in the folder `build --out` names (without `--out`, in `out/` inside the
 
 - The user has the video as a file on this machine. For a link, ask them for the file; this tool does not download videos.
 - The video is short: made for clips up to about a minute (it runs on longer ones with the overview spaced further apart, and past three minutes warns what will be slow).
-- Needs ffmpeg 7 or newer and Python 3.9 or newer. Spoken words need the optional `faster-whisper` package and its speech model; `check` says whether they are here and what getting them costs.
+- Needs ffmpeg 7 or newer and Python 3.9 or newer. Spoken words need a word-timed transcript: the tool's own path is the optional `faster-whisper` package and its speech model, and `check` says whether they are here and what getting them costs.
 
 ## Commands
 
@@ -23,7 +23,7 @@ Change into this skill's folder (the repository root) and run from there, or giv
 
 ```
 rs() { python3 -I scripts/riffsheet.py "$@"; }    # or: rs() { /path/to/venv/bin/python -I scripts/riffsheet.py "$@"; }
-rs check VIDEO                              # what this machine can do, and what this video needs (no network)
+rs check VIDEO                              # facts: what this machine has for an analysis (no network)
 rs transcribe VIDEO --out T.json            # word-timed transcript (optional; needs faster-whisper)
 rs scan VIDEO --out DIR --transcript T.json # measure everything; read DIR/summary.txt first
 rs text DIR --box x0,y0,x1,y1 --name NAME   # each state of a caption or text region, with times
@@ -42,22 +42,25 @@ Boxes are fractions of the frame, `x0,y0,x1,y1`, `0,0` at the top left. Every ti
 
 Talk to the person in their language: every question, every report on progress, and the result.
 
-## Before the analysis: what this machine can do
+## What this analysis needs, and asking for it
 
-Run `rs check VIDEO` first, on the video you were given. It uses no network and changes nothing. Read its last line, `VERDICT`:
+The tool reports facts and measures. You judge what this analysis needs and choose how to get it. The person agrees to anything that costs them something.
 
-- **ffmpeg missing or lacking a filter**: tell the person what is missing; nothing can be analyzed until they install it.
-- **ready for this video**: go on. A piece listed as not ready but not needed for this video (speech recognition for a video with no audio track) is not worth asking about.
-- **ready under another Python**: define `rs` with the interpreter `check` names and go on; nothing needs installing.
-- **a piece is not ready and matters for this video**: before anything else, ask the person once, in their language, whether to set it up. Say what it adds (its `adds` line), what the result will lack without it (its `without` line), and what it costs: each download's size in MB, the space on disk, that it needs the network, and where it goes (a virtual environment of its own in their home folder; the system Python is not changed). Take every number from `check`, never from memory. Then wait for the answer. Never install or download anything without a yes, and never carry on as if the piece were there.
-  - **Yes**: run the commands `check` printed under "prepare it", in order (the model comes only with `transcribe --download`), define `rs` with the Python `check` named for afterwards, run `rs check VIDEO` again to see it ready, and go on.
-  - **No**: go on without it. Tell the person once what the result will lack. Run `scan` without `--transcript`: the riffsheet then says the speech was not transcribed and why, and never that nobody speaks.
+- **Judge the need yourself**, from the person's request and from what you see in the pictures. A clip cut to music with nobody speaking does not need speech recognition, though it has an audio track; a request for the cut list does not need the spoken lines; a person talking to the camera, with a request to make their own version, does.
+- **Judge it when it appears**, not only at the start. Whenever you find you need something you do not have, run `rs check VIDEO`, then ask.
+- **`check` states facts** and uses no network and changes nothing: ffmpeg, and the tool's own speech recognition path, with what each adds, whether it is here, what preparing it costs (download size, space on disk, time, the network) and the commands that prepare and remove it. Its knowledge is a closed list, and its last line says so: it knows nothing about other tools on this machine. If ffmpeg is missing, tell the person; nothing can be analyzed until they install it.
+- **Ask once**, in the person's language, before preparing or using anything that costs them something. Say what it adds to this analysis and every cost: each download's size, the space on disk, the time, that it uses the network, and whether it would send their audio or video to an outside service (the tool's own path sends nothing; a service you propose may, and so may your own model provider, which receives what you open). Take the tool's numbers from `check`, never from memory; for anything else, say what you know of its cost and what you do not. Nothing is forbidden: the person decides. Then wait for the answer.
+- **Never prepare anything without a yes, and never carry on without saying what the result will lack.**
+  - **Yes** to the tool's own path: run the commands `check` printed under "prepare it", in order (the model comes only with `transcribe --download`), define `rs` with the Python `check` names for afterwards, run `rs check VIDEO` again to see it ready, and go on.
+  - **No**: go on without it, and tell the person once what the result will lack. Run `scan` without `--transcript`: the riffsheet then says the speech was not transcribed and why, and never that nobody speaks.
+- **Which speech recognizer is your choice.** `scan` needs a word-timed transcript in the format `transcribe` writes (`references/TOOL.md`). The tool offers one tested path, `transcribe` (faster-whisper with the `small` model), and `references/TOOL.md` gives what its measurements found for it. You may use another recognizer, another model size or a transcript the person supplies; pass `--transcript-by "what made it"` to `scan` (a transcript `transcribe` made needs nothing). The riffsheet records what made the transcript, and says plainly when it was not the tool's tested path.
+- **Means outside the tool.** When you establish a fact with anything the tool does not provide (another program, a service, a source you looked up), list it in the judgment file under `own_means` with what you used: the riffsheet marks it as established by your own means. When you need something and find no way to get it, record the gap under `tool_gaps`. `riffsheet.md` shows both.
 
 ## How to do it
 
 Follow `references/METHOD.md` from start to finish; read `references/TOOL.md` once for what each command prints and its limits. In short:
 
-1. With speech recognition ready: `rs transcribe VIDEO --out T.json; rs scan VIDEO --out DIR --transcript T.json && rs build DIR` (a `;` after `transcribe`: if it fails, it leaves in T.json why, and `scan` records it, so the riffsheet says the speech recognition failed and why; tell the person). Without it: `rs scan VIDEO --out DIR && rs build DIR`, or `scan --transcript` with a transcript the person made another way.
+1. With the tool's speech recognition: `rs transcribe VIDEO --out T.json; rs scan VIDEO --out DIR --transcript T.json && rs build DIR` (a `;` after `transcribe`: if it fails, it leaves in T.json why, and `scan` records it, so the riffsheet says the speech recognition failed and why; tell the person). Without speech recognition: `rs scan VIDEO --out DIR && rs build DIR`. With a transcript made another way: `rs scan VIDEO --out DIR --transcript T.json --transcript-by "what made it"`.
 2. Read the summary `scan` printed (no need to open `summary.txt` again), then open the overview sheets and any jump-cut sheet in one step.
 3. In one step, read every caption region with `text`, measure every graphic with `element`, and take the `zoom`, `frames`, `mouth` and `color` views the overview calls for. A full-frame end card over a still picture gets its times from `element` but no box: give that box by eye.
 4. Write the judgment file, taking pace words from the PACE block of the step 1 sheet and wrapping every statement that uses a word from its DETAIL WORDS list, and run `build DIR --judgment J.json --out OUT`.
@@ -65,14 +68,22 @@ Follow `references/METHOD.md` from start to finish; read `references/TOOL.md` on
 
 Batch independent commands and images into one step: each step costs a full re-read of the conversation.
 
-Then give the person `riffsheet.md`, or its translation into their language (below), and say what the analysis could not judge (anything that needs hearing) and anything that did not run (the paragraph **Not in this analysis** under its first line).
+Then report to the person (below), and say what the analysis lacks: anything that did not run or ran by other means (the paragraphs under the first line of `riffsheet.md`), and what it could not judge.
 
-## The result in the person's language
+## Telling the person
 
-`riffsheet.json` and `riffsheet.md` stay in English: they are what the tool's checks read. When the person is not working in English, after `build` prints `CHECKS: all passed`, write a translation for reading beside them, `riffsheet.<code>.md`, where `<code>` is the two-letter code of their language (`riffsheet.zh.md`, `riffsheet.es.md`, `riffsheet.ja.md`), and hand them that file. Rewrite it whenever `riffsheet.md` is rebuilt. It is your own writing: the tool neither writes nor checks it.
+`riffsheet.json` and `riffsheet.md` stay in English: they are what the tool's checks read. Do not write a translation of them unless asked. Report in your reply, in the person's language, the way a person wants to read it:
+
+1. One plain line per shot, with its time, saying what is seen: who and what, doing what. Not how it is framed.
+2. Why the video holds a viewer, and what their version has to keep.
+3. What the analysis lacks, and where the files are.
+
+Spoken lines and on-screen words stay in the video's own language, exactly as `riffsheet.md` gives them, in quotation marks; you may follow a quote with its meaning in their language in parentheses. Times and numbers are those of `riffsheet.md`.
+
+Only when the person asks for the whole riffsheet in their language, write `riffsheet.<code>.md` beside the English files, where `<code>` is the two-letter code of their language (`riffsheet.zh.md`, `riffsheet.es.md`, `riffsheet.ja.md`). Rewrite it whenever `riffsheet.md` is rebuilt. It is your own writing: the tool neither writes nor checks it.
 
 - The first line, in their language, says that it renders the checked English `riffsheet.md` beside it, which wins wherever the two differ (in Chinese, for example: 本文是同一文件夹里经过检查的英文版 riffsheet.md 的中文译本；两者不一致时，以 riffsheet.md 为准。).
-- Everything in `riffsheet.md` is there, in the same order, in their language: the title line, the line under it, every paragraph, every heading (`What happens`, `Beat by beat`, `Keep when remaking` and the rest), every beat and every list item. Nothing is summarized, added or left out.
+- Everything in `riffsheet.md` is there, in the same order, in their language: the title line, the line under it, every paragraph, every heading, every beat and every list item. Nothing is summarized, added or left out.
 - Unchanged, character for character: every time and time range (`00:02.4–00:04.1`, `2.375 s`), every number with its unit (`-10 dB`, `0 of 3 cuts`, `8.042 s`, `0.052 s`), and every spoken line and on-screen word in quotation marks, which stay in the video's own language exactly as `riffsheet.md` gives them (spelling, case, punctuation). You may follow a quote with its meaning in their language in parentheses.
 - Names of files, commands and fields (`riffsheet.json`, `zoom`) stay as they are; ordinary English words, the pace and measure words among them (`measured`, `brisk`, `locked`), are translated.
 

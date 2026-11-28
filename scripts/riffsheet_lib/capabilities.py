@@ -65,12 +65,23 @@ SPEECH_PACKAGE_DOWNLOAD_MB = 64
 SPEECH_PACKAGE_DISK_MB = 207
 # The model faster-whisper fetches for the default size, and its size: model.bin 483.5 MB, tokenizer.json
 # 2.2 MB, vocabulary.txt 0.5 MB, config.json 2 KB, as stored in the Hugging Face cache (the same on disk).
+# Installing the downloaded wheels into a fresh environment took 4.5 s (the same system, from a local
+# folder, so without the download); the download itself takes what the person's connection takes.
+SPEECH_PACKAGE_INSTALL_S = 5
 SPEECH_MODEL_REPO = {"small": "Systran/faster-whisper-small"}
 SPEECH_MODEL_MB = {"small": 486}
 
 SPEECH_ADDS = (
     "the spoken words, each with its start and end time, so the riffsheet quotes every line, says who says "
     "it and at what pace, and sets the sound measures against the words"
+)
+# run time of `transcribe` with the default model, from the model comparison in references/TOOL.md
+SPEECH_RUN_TIME = (
+    "transcribing takes about 2.4 to 4.6 s for a clip of 8 to 30 s (small model, CPU, int8; references/TOOL.md)"
+)
+SPEECH_OTHER_WAYS = (
+    "any recognizer that gives a word-timed transcript in the format `transcribe` writes (references/TOOL.md), "
+    "or a transcript the person supplies in it; `scan --transcript-by` records what made it"
 )
 SPEECH_LACKS = (
     "the riffsheet quotes no spoken line and cannot say whether anyone speaks; it says that the speech was not "
@@ -169,7 +180,8 @@ def speech_ready_here():
 
 
 def speech_status():
-    """The speech recognition entry of `check`."""
+    """The speech recognition entry of `check`: facts about the tool's own tested path (faster-whisper with
+    the small model), what preparing it would cost, and the commands that prepare and remove it."""
     venv = os.path.expanduser(VENV)
     vpy = os.path.join(venv, "bin", "python")
     here = importlib.util.find_spec("faster_whisper") is not None
@@ -178,14 +190,14 @@ def speech_status():
     tool = shlex.split(util.CMD)[-1]
     py = sys.executable if here else vpy
     run_with = f"{_q(py)} -I {_q(tool)}"
-    facts, cost, prepare = [], [], []
+    facts, cost, prepare, remove = [], [], [], []
     if here:
         v = _package_version("faster-whisper")
         facts.append(f"faster-whisper {v or '(version unknown)'} is installed for this Python ({sys.executable})")
     elif there:
         facts.append(
-            f"faster-whisper is installed in {venv}, not for this Python ({sys.executable}): run every riffsheet "
-            f"command with {vpy}"
+            f"faster-whisper is installed in {venv}, not for this Python ({sys.executable}): the tool runs it "
+            f"when every riffsheet command is run with {vpy}"
         )
     else:
         facts.append(f"faster-whisper is not installed for this Python ({sys.executable}), nor in {venv}")
@@ -195,10 +207,14 @@ def speech_status():
                 "download_mb": SPEECH_PACKAGE_DOWNLOAD_MB,
                 "disk_mb": SPEECH_PACKAGE_DISK_MB,
                 "network": True,
+                "sends_media": False,
+                "time": f"the download as long as {SPEECH_PACKAGE_DOWNLOAD_MB} MB takes on the connection, then about "
+                f"{SPEECH_PACKAGE_INSTALL_S} s to install",
                 "measured": "faster-whisper 1.2.1, Python 3.9, macOS on Apple silicon; other systems differ somewhat",
             }
         )
         prepare += [f"{_q(sys.executable)} -m venv {_q(venv)}", f"{_q(vpy)} -m pip install faster-whisper"]
+        remove.append(f"rm -rf {_q(venv)}")
     if model:
         facts.append(f"the speech model ({TRANSCRIBE_MODEL}) is on this machine: {_mb(model[1])} MB in {model[0]}")
     else:
@@ -209,56 +225,75 @@ def speech_status():
                 "download_mb": SPEECH_MODEL_MB[TRANSCRIBE_MODEL],
                 "disk_mb": SPEECH_MODEL_MB[TRANSCRIBE_MODEL],
                 "network": True,
+                "sends_media": False,
+                "time": f"as long as {SPEECH_MODEL_MB[TRANSCRIBE_MODEL]} MB takes on the connection",
                 "measured": "its size as stored in a Hugging Face cache",
             }
         )
         prepare.append(f"{run_with} transcribe VIDEO --out T.json --download")
+        remove.append(
+            "rm -rf "
+            + _q(os.path.join(hf_cache(), "models--" + SPEECH_MODEL_REPO[TRANSCRIBE_MODEL].replace("/", "--")))
+        )
     # missing: the package is not anywhere (a model alone does nothing); partly there: the package is
     # installed but the model is not here, or the package is only in the virtual environment
     state = "ready" if here and model else ("partial" if here or there else "missing")
-    remove = [] if here else [f"rm -rf {_q(venv)}"]
-    remove.append(
-        "rm -rf " + _q(os.path.join(hf_cache(), "models--" + SPEECH_MODEL_REPO[TRANSCRIBE_MODEL].replace("/", "--")))
-    )
     return {
         "id": "speech_recognition",
         "name": "speech recognition",
+        "path": f"the tool's tested path: `transcribe`, faster-whisper with the {TRANSCRIBE_MODEL} model",
         "state": state,
         "facts": facts,
         "adds": SPEECH_ADDS,
         "without": SPEECH_LACKS,
+        "run_time": SPEECH_RUN_TIME,
         "cost": cost,
         "prepare": prepare,
         "run_with": run_with,
         "remove": remove,
+        "other_ways": SPEECH_OTHER_WAYS,
     }
 
 
 def speech_for_video(info):
-    """Whether speech recognition matters for this video, and why."""
-    if not info["has_audio"]:
-        return {"needed": False, "why": "the video has no audio track"}
-    return {
-        "needed": True,
-        "why": "the video has an audio track; whether anyone speaks in it, and what is said, is what speech "
-        "recognition finds",
-    }
+    """A plain fact that rules speech recognition out for this video, or None."""
+    return "the video has no audio track: there is nothing to transcribe" if not info["has_audio"] else None
 
 
-CAPABILITIES = ((speech_status, speech_for_video),)  # (status, for_video) per optional capability
+CAPABILITIES = ((speech_status, speech_for_video),)  # (status, plain exclusion for a video) per capability
+# what `check` covers, said at its end: its knowledge is this closed list
+COVERS = (
+    "This report covers ffmpeg and the tool's own speech recognition path (faster-whisper with the {model} "
+    "model, in this Python or in {venv}). It knows nothing about other tools on this machine or elsewhere "
+    "(other speech recognizers, models or services): whether one would serve this analysis is for the agent "
+    "to judge, and anything it costs the person is for the person to agree to."
+)
 
 
 # ----------------------------------------------------------------------------- stage records (scan, build)
-def speech_stage(info, transcript):
+# what `transcribe` writes as a transcript's "model" (riffsheet 0.1.0 on): the tool's own path, with the
+# model size it ran; the tested path is that command with the default size
+TRANSCRIBE_STAMP = re.compile(r"^faster-whisper (\S+) \(int8, cpu\)$")
+TESTED_PATH = f"riffsheet transcribe with faster-whisper's {TRANSCRIBE_MODEL} model"
+
+
+def speech_stage(info, transcript, made_by=None):
     """The speech recognition stage as scan records it. `transcript` is what load_words returned as
-    metadata (None without --transcript)."""
+    metadata (None without --transcript); `made_by` is what `scan --transcript-by` says made it. A ran
+    record says what made the transcript and whether that was the tool's tested path (`tested`)."""
     if transcript is not None:
         if transcript.get("stage"):  # transcribe could not make a transcript and wrote why
             return dict(transcript["stage"])
-        return {
-            "state": "ran",
-            "by": transcript.get("model") or "a transcript given to scan (it does not say how it was made)",
-        }
+        model = transcript.get("model")
+        stamp = TRANSCRIBE_STAMP.match(model) if isinstance(model, str) and not made_by else None
+        if stamp:
+            return {"state": "ran", "by": model, "tested": stamp.group(1) == TRANSCRIBE_MODEL}
+        by = made_by or (
+            f"{model} (as the transcript names it)"
+            if model
+            else "a transcript given to scan that does not say what made it"
+        )
+        return {"state": "ran", "by": by, "tested": False}
     if not info["has_audio"]:
         return {"state": "not_run", "why": "the video has no audio track"}
     why = speech_ready_here()
@@ -274,11 +309,21 @@ STAGE_RECORDS = {"speech_recognition": speech_stage}
 
 def stages_of(idx):
     """The stage records of a scan. A scan made before riffsheet 0.2.0 has none: they are derived from what
-    it does record (a transcript, an audio track), saying so."""
+    it does record (a transcript, an audio track), saying so. A ran record without `tested` (written while
+    0.2.0 was in development) is given it from its `by`."""
     if idx.get("stages"):
-        return idx["stages"]
+        out = {k: dict(v) for k, v in idx["stages"].items()}
+        sp = out.get("speech_recognition") or {}
+        if sp.get("state") == "ran" and "tested" not in sp:
+            stamp = TRANSCRIBE_STAMP.match(sp.get("by") or "")
+            sp["tested"] = bool(stamp) and stamp.group(1) == TRANSCRIBE_MODEL
+        return out
     if idx.get("transcript_meta"):
-        sp = {"state": "ran", "by": "a transcript given to scan (a scan made before riffsheet 0.2.0 does not say how)"}
+        sp = {
+            "state": "ran",
+            "by": "a transcript given to scan (a scan made before riffsheet 0.2.0 does not say what made it)",
+            "tested": False,
+        }
     elif not idx["facts"].get("has_audio"):
         sp = {"state": "not_run", "why": "the video has no audio track"}
     else:
@@ -295,7 +340,9 @@ STAGE_LACKS = {
 
 def stage_lines(stages, facts):
     """One sentence per optional stage that failed or did not run, for riffsheet.md and the build sheet.
-    A stage that did not run because the video has nothing for it (speech, no audio track) says only that."""
+    A stage that did not run because the video has nothing for it (speech, no audio track) says only that.
+    Failed means the stage was there and stopped while running; did not run, that it was not there or not
+    used."""
     out = []
     for k, st in stages.items():
         if st["state"] == "ran":
@@ -304,9 +351,21 @@ def stage_lines(stages, facts):
         lack = STAGE_LACKS.get(k)
         if k == "speech_recognition" and not facts.get("has_audio"):
             lack = None
-        verb = "failed" if st["state"] == "failed" else "did not run"
+        verb = "was there but failed while running" if st["state"] == "failed" else "did not run"
         out.append(f"{name} {verb}: {st['why'].rstrip('.')}." + (f" {lack}" if lack else ""))
     return out
+
+
+def untested_lines(stages):
+    """One sentence per optional stage that ran by other means than the tool's tested path: the agent's own
+    choice of recognizer, model size or a transcript the person supplied."""
+    sp = stages.get("speech_recognition") or {}
+    if sp.get("state") != "ran" or sp.get("tested", True):
+        return []
+    return [
+        f"The spoken words were transcribed by {sp['by'].rstrip('.')}, not by the tool's tested path "
+        f"({TESTED_PATH}): the word accuracy measured for that path does not apply to them."
+    ]
 
 
 # ----------------------------------------------------------------------------- check
@@ -316,10 +375,9 @@ def cmd_check(a):
     ff = ffmpeg_status()
     report["ffmpeg"] = ff
     caps = [status() for status, _ in CAPABILITIES]
-    info = None
     if a.video:
         video = os.path.abspath(a.video)
-        if ff["state"] != "ready" and not (ff["ffmpeg"] and ff["ffprobe"]):
+        if not (ff["ffmpeg"] and ff["ffprobe"]):
             report["video"] = {"path": video, "readable": False, "why": "ffprobe is needed to read it"}
         else:
             info = probe(video)  # an unreadable file stops here, as every command does
@@ -330,55 +388,20 @@ def cmd_check(a):
                 "height": info["height"],
                 "has_audio": info["has_audio"],
             }
-            for c, (_, for_video) in zip(caps, CAPABILITIES):
-                c["for_this_video"] = for_video(info)
+            for c, (_, excluded) in zip(caps, CAPABILITIES):
+                why = excluded(info)
+                if why:
+                    c["not_for_this_video"] = why
     report["capabilities"] = caps
-    report["verdict"] = verdict(ff, caps, info)
+    report["covers"] = COVERS.format(model=TRANSCRIBE_MODEL, venv=os.path.expanduser(VENV))
     if a.json:
         print(json.dumps(report, indent=1, ensure_ascii=False))
         return
     print(check_text(report))
 
 
-def verdict(ff, caps, info):
-    if ff["state"] != "ready":
-        return (
-            "riffsheet cannot run here: "
-            + "; ".join(ff["problems"])
-            + f" (it needs ffmpeg {FFMPEG_MIN_MAJOR}.0 or newer)"
-        )
-    gaps = [c for c in caps if c["state"] != "ready"]
-    if info is None:
-        if not gaps:
-            return "ready: every optional capability is ready"
-        return (
-            "runs here; not ready: "
-            + ", ".join(c["name"] for c in gaps)
-            + " (run check VIDEO to see whether it matters for a video)"
-        )
-    matter = [c for c in gaps if c["for_this_video"]["needed"]]
-    if not matter:
-        return "ready for this video" + (
-            " (" + ", ".join(c["name"] + " is not ready but not needed" for c in gaps) + ")" if gaps else ""
-        )
-    parts = []
-    for c in matter:
-        if c["cost"]:
-            parts.append(f"{c['name']} is not ready and matters for this video")
-        else:
-            parts.append(f"{c['name']} is ready under another Python: run every command with {c['run_with']}")
-    asks = [c for c in matter if c["cost"]]
-    tail = (
-        ". Ask the person before preparing it (it downloads over the network); without it, "
-        + "; ".join(c["without"] for c in asks)
-        if asks
-        else ""
-    )
-    return "; ".join(parts) + tail
-
-
 def check_text(r):
-    L = [f"riffsheet {r['version']} check (no network used)"]
+    L = [f"riffsheet {r['version']} check (no network used, nothing changed)"]
     L.append(f"python   {r['python']['path']} ({r['python']['version']})")
     ff = r["ffmpeg"]
     if ff["state"] == "ready":
@@ -387,7 +410,10 @@ def check_text(r):
             f"{len(FFMPEG_FILTERS)} filters the tool uses are present ({', '.join(FFMPEG_FILTERS)})"
         )
     else:
-        L.append(f"ffmpeg   MISSING (required, {FFMPEG_MIN_MAJOR}.0 or newer): " + "; ".join(ff["problems"]))
+        L.append(
+            f"ffmpeg   MISSING (required, {FFMPEG_MIN_MAJOR}.0 or newer; nothing can be analyzed without it): "
+            + "; ".join(ff["problems"])
+        )
     v = r.get("video")
     if v:
         if v.get("readable") is False:
@@ -400,27 +426,29 @@ def check_text(r):
     for c in r["capabilities"]:
         L.append("")
         state = {"ready": "ready", "missing": "MISSING", "partial": "PARTLY THERE"}[c["state"]]
-        L.append(f"{c['name']} (optional): {state}")
+        L.append(f"{c['name']} (optional; {c['path']}): {state}")
         for f in c["facts"]:
             L.append(f"  - {f}")
+        if c.get("not_for_this_video"):
+            L.append(f"  for this video: {c['not_for_this_video']}")
         L.append(f"  adds: {c['adds']}")
         L.append(f"  without it: {c['without']}")
-        if "for_this_video" in c:
-            fv = c["for_this_video"]
-            L.append(f"  for this video: {'needed' if fv['needed'] else 'not needed'} ({fv['why']})")
+        L.append(f"  when run: {c['run_time']}")
+        if c["cost"]:
+            L.append("  what preparing it costs:")
+            for x in c["cost"]:
+                L.append(
+                    f"    - {x['what']}: about {x['download_mb']} MB to download, {x['disk_mb']} MB on disk; "
+                    f"time: {x['time']}; needs the network; sends no audio or video anywhere ({x['measured']})"
+                )
+        if c["prepare"]:
+            L.append("  prepare it (the system Python is not changed):")
+            L += [f"    {x}" for x in c["prepare"]]
         if c["state"] != "ready":
-            if c["cost"]:
-                L.append("  what getting it costs:")
-                for x in c["cost"]:
-                    L.append(
-                        f"    - {x['what']}: about {x['download_mb']} MB to download, {x['disk_mb']} MB on disk, "
-                        f"needs the network ({x['measured']})"
-                    )
-            if c["prepare"]:
-                L.append("  prepare it (only with the person's yes; the system Python is not changed):")
-                L += [f"    {x}" for x in c["prepare"]]
             L.append(f"  then run every riffsheet command with: {c['run_with']}")
-            L.append("  to remove it later: " + "; ".join(c["remove"]))
+        if c["remove"]:
+            L.append("  to remove what preparing adds: " + "; ".join(c["remove"]))
+        L.append(f"  other ways: {c['other_ways']}")
     L.append("")
-    L.append("VERDICT: " + r["verdict"])
+    L.append(r["covers"])
     return "\n".join(L)

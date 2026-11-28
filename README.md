@@ -16,7 +16,7 @@ You get a riffsheet: what happens, why it holds a viewer, and what your own vers
 
 ## Install
 
-You need ffmpeg 7 or newer and Python 3.9 or newer. Spoken words need the optional `faster-whisper` package and its speech model. Before an analysis your agent checks what this machine has; if the video has sound and speech recognition is missing, it tells you what it would add and how much it downloads, and sets it up only if you say yes (see [Requirements](#requirements)).
+You need ffmpeg 7 or newer and Python 3.9 or newer. Spoken words need a speech recognizer: the tool's own is the optional `faster-whisper` package and its speech model. When your agent judges that a video's speech matters and the recognizer is not set up, it tells you what it would add and what it costs (download, disk space, time, network), and sets it up only if you say yes (see [Requirements](#requirements)).
 
 **1. Tell your agent** (Claude Code, Codex, or any agent that runs commands):
 
@@ -45,7 +45,7 @@ Why does this TikTok work? I want to make my own version.
 Analyze this Reel and list every caption with its timing.
 ```
 
-About 4 to 8 minutes later you have `riffsheet.md` to read and `riffsheet.json` with every value, and, if you asked in another language, a translation of `riffsheet.md` into that language. This is the start of one from the examples, an 8-second video spoken in Spanish:
+About 4 to 8 minutes later you have `riffsheet.md` to read and `riffsheet.json` with every value, and your agent tells you in your own language what it found: one plain line per shot, why the video holds a viewer and what your version has to keep. This is the start of one riffsheet from the examples, an 8-second video spoken in Spanish:
 
 > **8.042 s · 4 shots · one picture at a time · spoken on camera (es) · 5 spoken lines**
 >
@@ -66,11 +66,11 @@ Two first runs by coding agents that had never seen the project, on videos of ou
 
 ## What you get
 
-Two files per video, and a third when you work in a language other than English:
+Two files per video, written in English:
 
 - `riffsheet.md`, an account of the video for a person to read: what happens, why it holds a viewer, and then each beat in order, with what is on screen, what is said, what the beat does for the viewer and what a remake has to keep.
 - `riffsheet.json`, the complete data: every spoken line with its time and pace, every caption with its words, times, position, size and colors, every graphic with its box and times, the people and objects, a time-coded description of each segment, where sound events fall on the cuts and caption appearances, and where each value came from. The format is in [`schema/riffsheet.schema.json`](schema/riffsheet.schema.json).
-- `riffsheet.zh.md` (or `.es.md`, `.ja.md` and so on), the same account in your language, written by the agent from the checked `riffsheet.md`: every time and number unchanged, and the spoken lines and on-screen words left in the video's own language.
+If you ask for the whole account in your language, the agent also writes `riffsheet.zh.md` (or `.es.md`, `.ja.md` and so on) from the checked `riffsheet.md`: every time and number unchanged, and the spoken lines and on-screen words left in the video's own language.
 
 The line quoted above, in `riffsheet.json`, with the agent's correction of a misheard word:
 
@@ -89,7 +89,7 @@ The line quoted above, in `riffsheet.json`, with the agent's correction of a mis
 - **Every value says where it came from:** measured by the tool, seen by the agent, inferred, uncertain, or not judged. Where the evidence does not settle a measurement, the tool leaves the value out and says why.
 - **Every detail points to a close view of its moment.** A statement about what people wear and hold, a product or the place has to name a large view of a moment it describes, or be marked uncertain; until then the tool writes no riffsheet. The tool checks that the view exists and shows that moment; matching the words to it is the agent's work.
 - **It says what it could not judge.** Tone of voice, what kind of music plays and anything else the pictures and measurements do not settle are listed as not judged.
-- **It says what did not run.** If speech recognition was not set up, or failed, the riffsheet says under its first line that the speech was not transcribed and why; it never reads as a video without speech.
+- **It says what did not run, and what came from elsewhere.** If speech recognition was not set up, or failed, the riffsheet says under its first line that the speech was not transcribed and why; it never reads as a video without speech. A transcript from another recognizer, and any fact the agent established by its own means, is marked as such, and what the tool lacked for the video is listed.
 - **Nothing to install but ffmpeg.** Plain Python, standard library only. No model download is needed; speech recognition is optional.
 - **It explains why the video works.** Beat by beat, what each part does for the viewer, and one test a remake has to pass to keep it.
 
@@ -115,7 +115,7 @@ Measured again on the code in this release: the cut finder still finds 24 of the
 - **Catch every edit.** A jump cut inside one framing is found when a tenth of the picture or more changes in one frame and keeps its colors: 7 of 9 on a 45-second talking video. Smaller jumps are flagged for the agent or not found; a different outfit, person or object faded in over the same background is not detected; a slow dissolve can be missed. [`references/TOOL.md`](references/TOOL.md) lists every known limit.
 - **Handle long videos well.** It is made for clips up to about a minute and was tested on clips of 8 to 45 seconds. A longer video runs with its overview pictures spaced further apart, and past three minutes the tool warns what will be slow.
 - **Fetch videos from a link.** Give it the file.
-- **Check the translation.** The riffsheet the tool checks is written in English, whatever language you ask in. When you ask in another language, the agent also writes a translation into it, which the tool does not check; where the two differ, the English one is right. The video can be in any language: its spoken lines and on-screen words are kept as they are in both.
+- **Check what the agent tells you in your language.** The riffsheet the tool checks is written in English, whatever language you ask in. The agent's account in your language, and a translation if you ask for one, are its own writing, which the tool does not check; where they differ from `riffsheet.md`, `riffsheet.md` is right. The video can be in any language: its spoken lines and on-screen words are kept as they are.
 
 ## Time and cost
 
@@ -140,11 +140,11 @@ Other things Swap changes, such as a coat's color, or the outfit and the place t
 
 ## Privacy
 
-Everything runs on your machine: the video, the pictures and the results stay in the folders you choose. The only network use is setting up speech recognition, and only when you agree to it: installing the `faster-whisper` package, and the speech-model download, which the tool makes only when asked with `--download`. What your coding agent sends to its own model provider is governed by that agent.
+The tool itself uses no network (except the speech-model download you ask for), needs no account and sends nothing to us; the video, the pictures and the results stay in the folders you choose. What your agent sends to its own model provider, and anything else it proposes to use, is between you and the agent, and the agent says so when it asks.
 
 ## Questions
 
-**Does it work offline?** Yes. Once the optional speech recognition is set up, nothing uses the network.
+**Does it work offline?** The tool does: once the optional speech recognition is set up, it uses no network. Your agent still talks to its own model provider.
 
 **Which agents does it work with?** Any agent that can run shell commands and open images: Claude Code and Codex find it as a skill; others can be told to read `SKILL.md`.
 
@@ -158,12 +158,12 @@ Everything runs on your machine: the video, the pictures and the results stay in
 
 - ffmpeg and ffprobe, version 7 or newer, on your `PATH` (`brew install ffmpeg` on macOS, your package manager on Linux).
 - Python 3.9 or newer. The tool itself uses only the standard library.
-- For spoken words (optional): the `faster-whisper` package and its `small` speech model. `python3 -I scripts/riffsheet.py check` says whether they are on this machine, what they would cost (the package about 64 MB to download and 207 MB on disk, measured on macOS; the model 486 MB, once) and prints the commands that set them up in a virtual environment of their own, `~/.riffsheet/venv`, leaving your system Python as it is, and the commands that remove them. The tool never downloads the model on its own: `transcribe` fetches it only with `--download`, into the usual Hugging Face cache. Your agent runs `check` and asks you before any of this. Without speech recognition the analysis still covers everything visual and says that the speech was not transcribed; you can also supply a transcript you made another way, in the same format.
+- For spoken words (optional): a word-timed transcript. The tool's own path is the `faster-whisper` package and its `small` speech model; your agent may use another recognizer, or a transcript you supply in the same format, and the riffsheet then says what made it. `python3 -I scripts/riffsheet.py check` says whether they are on this machine, what they would cost (the package about 64 MB to download and 207 MB on disk, measured on macOS; the model 486 MB, once) and prints the commands that set them up in a virtual environment of their own, `~/.riffsheet/venv`, leaving your system Python as it is, and the commands that remove them. The tool never downloads the model on its own: `transcribe` fetches it only with `--download`, into the usual Hugging Face cache. Your agent asks you before any of this. Without speech recognition the analysis still covers everything visual and says that the speech was not transcribed.
 
 To check an install, change into the repository folder and run `python3 -I scripts/riffsheet.py check`; the tests run with `python3 -B -m unittest` (they draw their own test clips with ffmpeg).
 
 ## Contributing and license
 
-Wrong readings and bugs go to [Issues](../../issues/new/choose): there is a template for a statement in a riffsheet that is wrong, and one for a bug or install problem. How to run the tests and the rules for changes are in [CONTRIBUTING.md](CONTRIBUTING.md); changes are listed in [CHANGELOG.md](CHANGELOG.md).
+Wrong readings and bugs go to [Issues](../../issues/new/choose): there is a template for a statement in a riffsheet that is wrong, one for a bug or install problem, and one for something the tool lacked (what you or your agent needed, and what was used instead). How to run the tests and the rules for changes are in [CONTRIBUTING.md](CONTRIBUTING.md); changes are listed in [CHANGELOG.md](CHANGELOG.md).
 
 MIT. See [`LICENSE`](LICENSE).
