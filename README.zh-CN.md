@@ -47,7 +47,7 @@ git clone https://github.com/riffkit/riffsheet ~/.agents/skills/riffsheet   # Co
 分析这条 Reel，把每条字幕和它出现的时间列出来。
 ```
 
-大约 4 到 8 分钟后，你会得到供人阅读的 `riffsheet.md`，以及包含全部数值的 `riffsheet.json`。下面是其中一个示例的开头，一条 8 秒、用西班牙语说话的视频（结果原文是英文）（结果是英文的，以下原样引用）：
+大约 4 到 8 分钟后，你会得到供人阅读的 `riffsheet.md`，以及包含全部数值的 `riffsheet.json`。下面是其中一个示例的开头，一条 8 秒、用西班牙语说话的视频（结果是英文的，以下原样引用）：
 
 > **8.042 s · 4 shots · one picture at a time · spoken on camera (es) · 5 spoken lines**
 >
