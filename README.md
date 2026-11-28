@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/media/icon_rounded.png" width="96" alt="The riffsheet icon"></p>
+
 <h1 align="center">riffsheet</h1>
 
 <p align="center"><b>Video breakdown for coding agents: your agent analyzes a short video shot by shot, on your own machine.</b><br>

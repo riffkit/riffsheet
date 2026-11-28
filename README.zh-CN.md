@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/media/icon_rounded.png" width="96" alt="riffsheet 图标"></p>
+
 <h1 align="center">riffsheet</h1>
 
 <p align="center"><b>给编程 agent 用的视频拆解工具：在你自己的电脑上，让 agent 把一条短视频逐镜头拆开。</b><br>
