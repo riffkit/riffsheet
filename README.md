@@ -136,7 +136,7 @@ The two examples, remade with Swap:
 
 Other things Swap changes, such as a coat's color, or the outfit and the place together:
 
-<p align="center"><img src="docs/media/more_swaps.jpg" width="880" alt="More Swap results: a coat in a different color; a different outfit in a different place"></p>
+<p align="center"><img src="docs/media/more_swaps.jpg" width="880" alt="More Swap results: a coat in a different color, and a different outfit in a different place"></p>
 
 ## Privacy
 

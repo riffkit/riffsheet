@@ -19,11 +19,11 @@ The agent ran on a file called `video.mp4`, and the report's heading is taken fr
 Look first at:
 
 1. `riffsheet.md`.
-2. `pictures/overview_01.jpg`: the first overview sheet, one cell every half second.
-3. `pictures/top_caption.jpg`: the caption, with its measured on and off times.
-4. `pictures/frames_3.25_4.50_01.jpg`: consecutive frames of the kick into the lens (the first of two pages).
-5. `pictures/mouth_5.90_6.37_50-28-78-44.jpg`: her mouth at every frame while speech recognition reports words.
-6. `pictures/zoom_5.00_00-00-100-75.jpg`: a close view the dress and gloves were checked on.
+2. [pictures/overview_01.jpg](pictures/overview_01.jpg): the first overview sheet, one cell every half second.
+3. [pictures/top_caption.jpg](pictures/top_caption.jpg): the caption, with its measured on and off times.
+4. [pictures/frames_3.25_4.50_01.jpg](pictures/frames_3.25_4.50_01.jpg): consecutive frames of the kick into the lens (the first of two pages).
+5. [pictures/mouth_5.90_6.37_50-28-78-44.jpg](pictures/mouth_5.90_6.37_50-28-78-44.jpg): her mouth at every frame while speech recognition reports words.
+6. [pictures/zoom_5.00_00-00-100-75.jpg](pictures/zoom_5.00_00-00-100-75.jpg): a close view the dress and gloves were checked on.
 
 ## What the agent was unsure of, and what went wrong on the way
 
