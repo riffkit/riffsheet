@@ -31,6 +31,16 @@ class Failures(unittest.TestCase):
         self.assertRegex(riffsheet_lib.VERSION, r"^\d+\.\d+\.\d+$")  # a release version, kept apart from
         self.assertIsInstance(riffsheet_lib.FORMAT_VERSION, int)  # the output format's own number
 
+    def test_plugin_manifest_carries_the_release_version(self):
+        """The Claude Code plugin manifest is a second place the release version is written."""
+        import json
+
+        root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        with open(os.path.join(root, ".claude-plugin", "plugin.json"), encoding="utf-8") as fh:
+            manifest = json.load(fh)
+        self.assertEqual(manifest["version"], riffsheet_lib.VERSION)
+        self.assertEqual(manifest["name"], "riffsheet")
+
     def test_ffmpeg_missing(self):
         empty = os.path.join(clips.WORK, "empty bin")
         os.makedirs(empty, exist_ok=True)

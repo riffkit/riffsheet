@@ -1,0 +1,10 @@
+{
+  "name": "riffsheet",
+  "description": "Video breakdown for coding agents: your agent analyzes a short video shot by shot on your own machine, with cut, caption, loudness and word times measured, and says why it holds a viewer, beat by beat.",
+  "version": "0.2.0",
+  "author": {"name": "Riffkit", "url": "https://github.com/riffkit"},
+  "homepage": "https://github.com/riffkit/riffsheet",
+  "repository": "https://github.com/riffkit/riffsheet",
+  "license": "MIT",
+  "keywords": ["video-breakdown", "video-analysis", "shot-detection", "short-video"]
+}
