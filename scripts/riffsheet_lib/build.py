@@ -849,6 +849,62 @@ def time_pair(tm):
     return isinstance(tm, list) and len(tm) == 2 and all(isinstance(v, (str, int, float)) for v in tm)
 
 
+# words that say what a sound is, which only hearing settles (`references/TOOL.md`, Sound words)
+SOUND_WORDS = re.compile(
+    r"\b(?:music(?:al)?|songs?|sung|sings?|singing|singers?|melod(?:y|ies|ic)|instrumentals?|lyrics?|"
+    r"bass(?:lines?)?|drums?|percussion|beat drops?|whoosh(?:es)?|swoosh(?:es)?|sound effects?|sfx|"
+    r"jingles?|chimes?|applause|tone of (?:\w+ )?voice)\b",
+    re.I,
+)
+# a sentence holding one of these says the sound is not known, rather than what it is
+SOUND_NOT_KNOWN = re.compile(
+    r"\b(?:whether|unknown|unclear|(?:cannot|can't|can not) be (?:judged|told|known|heard)|"
+    r"(?:is|are|was|were|stays?) not (?:known|judged|heard|told apart))\b",
+    re.I,
+)
+# fields whose text is not the agent's statement of what the sound is: what it says it cannot judge, the
+# heard statements (after a pass), and words taken from the transcript or the screen
+SOUND_FREE_KEYS = ("cannot_judge", "heard", "fix", "inline_text", "highlight_words")
+
+
+def judgment_texts(x, where=""):
+    """(where, text) of every string the agent wrote in the judgment, outside SOUND_FREE_KEYS."""
+    if isinstance(x, dict):
+        for k, v in x.items():
+            if k not in SOUND_FREE_KEYS:
+                yield from judgment_texts(v, f"{where}.{k}" if where else str(k))
+    elif isinstance(x, list):
+        for k, v in enumerate(x):
+            yield from judgment_texts(v, f"{where}[{k}]")
+    elif isinstance(x, str):
+        yield where, x
+
+
+def check_sound_claims(s):
+    """Without a passed hearing check, nothing has heard the sound: a statement anywhere in the judgment of
+    what it is (music, a song, a sound effect, a tone of voice) would state as fact what nobody heard. Found
+    by the words of SOUND_WORDS, as check_no_speech_claims finds claims that nobody speaks."""
+    st = hearing_state(s.jj.d)["state"] if s.idx["facts"].get("has_audio") else "no_audio_track"
+    if st == "passed":
+        return
+    why = {
+        "failed": "this agent's hearing check failed",
+        "cannot_hear": "this agent said it cannot open sound",
+        "not_taken": "no hearing check was answered for this analysis",
+        "no_audio_track": "the video has no audio track",
+    }[st]
+    for where, text in judgment_texts(s.J):
+        for sent in re.split(r"(?<=[.;!?])\s+", text):
+            if SOUND_NOT_KNOWN.search(sent):
+                continue
+            for m in SOUND_WORDS.finditer(sent):
+                s.problems.append(
+                    f"{where}: '{m.group(0)}' says what the sound is, and nothing heard it ({why}). Say only what "
+                    f"the tool measured (loudness, times) and put what the sound is under cannot_judge; after a "
+                    f"passed hearing check, write it under heard"
+                )
+
+
 def build_own_means(s):
     """Facts the agent established by means the tool does not provide (another program, a service, a source
     of its own), each with what it used: they go out marked as such, never as measured or seen."""
@@ -1237,6 +1293,7 @@ STAGES = (
     check_garment_color_names,
     check_voiceover_in_summary,
     check_no_speech_claims,
+    check_sound_claims,
     build_own_means,
     build_heard,
     check_measured_colors,

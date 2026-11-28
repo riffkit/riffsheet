@@ -2,7 +2,7 @@
 
 8.042 s · 4 shots · one picture at a time · spoken on camera (es) · 5 spoken lines
 
-**Sound.** Not judged: no hearing check was taken for this analysis, so nothing here says what the sound is (music, tone of voice, sound effects). Times and loudness are measured by the tool.
+**Sound.** Not judged: no hearing check was taken for this analysis. Nothing in this file that says what the sound is was heard: `build` lists each such statement it finds (music, a song, a sound effect, a tone of voice and like words) as an open check. Times and loudness are measured by the tool.
 
 Sound and picture (measured times, not what the sound is): 0 of 3 cuts land on a loudness peak or rise (within 0.052 s); about 0.4 would by chance, with 11 peaks and rises in 8.0 s; 4 of 5 caption appearances land on a loudness peak or rise (within 0.052 s); about 0.7 would by chance, with 11 peaks and rises in 8.0 s.
 

@@ -276,6 +276,42 @@ class Build(clips.MainClipCase):
             self.assertIn(needle, r.stdout, heard)
             self.assertEqual(json.loads(read(os.path.join(out, "riffsheet.json")))["audio"]["heard"], [])
 
+    def sound_claims(self, j):
+        """The reviewer's judgment: what the sound is, said everywhere but under heard (the j1 case)."""
+        j["report"]["what_happens"] = (
+            "Three pictures in turn. An upbeat K-pop song with a heavy bass drop plays throughout, and a whoosh "
+            "sound effect lands on the kick."
+        )
+        j["segments"][0]["text"] += " A soft piano melody plays under it."
+        j["segments"][0]["uncertain"] = ["whether the tone is music cannot be judged"]
+        j["own_means"] = [{"fact": "The song is an upbeat K-pop track", "used": "my own hearing"}]
+        j["tool_gaps"] = ["the track is a cheerful dance song, which the tool cannot say"]
+        j["cannot_judge"] = ["what the sound track is (music, effects or ambience)"]
+
+    def test_without_a_pass_nothing_may_say_what_the_sound_is(self):
+        r, out = clips.build_judgment(self.d, self.ids, "sound claims", edit=self.sound_claims)
+        ok(self, r)
+        for where, word in (
+            ("report.what_happens", "song"),
+            ("report.what_happens", "bass drop"[:4]),
+            ("report.what_happens", "whoosh"),
+            ("report.what_happens", "sound effect"),
+            ("segments[0].text", "melody"),
+            ("own_means[0].fact", "song"),
+            ("tool_gaps[0]", "song"),
+        ):
+            self.assertIn(f"{where}: '{word}' says what the sound is, and nothing heard it", r.stdout)
+        self.assertNotIn("uncertain[0]", r.stdout)  # a sentence saying the sound is not known
+        md = read(os.path.join(out, "riffsheet.md"))
+        self.assertIn("**Sound.** Not judged: no hearing check was taken for this analysis. Nothing in this", md)
+        self.assertIn("as an open check", md)
+        self.assertIn("## Open checks", md)
+        # after a pass the agent may say it
+        d = self.passed_copy("sound claims")
+        r, _ = clips.build_judgment(d, self.ids, "sound claims heard", edit=self.sound_claims)
+        ok(self, r)
+        self.assertIn("CHECKS: all passed", r.stdout)
+
     def test_not_judged_says_why(self):
         r, out = clips.build_judgment(self.d, self.ids, "no check")
         ok(self, r)

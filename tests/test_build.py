@@ -162,7 +162,7 @@ class BuildChecks(unittest.TestCase):
         r, _ = self.build(
             "plain",
             "Bars stand still under soft window light and a ring light glow; the pauses fall "
-            "to near silence (no music bed), and the caption sits on the bars.",
+            "to near silence (no sound bed), and the caption sits on the bars.",
         )
         ok(self, r)
         self.assertIn("CHECKS: all passed", r.stdout)

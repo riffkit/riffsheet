@@ -305,8 +305,9 @@ def sound_line(hearing):
     st = hearing["state"]
     if st == "passed":
         return (
-            "Heard by the agent, which passed the hearing check for this analysis: what it says the sound is "
-            "(music, voices, sound effects) is marked heard by the agent. Times and loudness are measured by the tool."
+            "Heard by the agent, which passed the hearing check for this analysis: what this file says the sound "
+            "is (music, voices, sound effects) comes from the agent's listening, and its statements under heard "
+            "are marked heard by the agent. Times and loudness are measured by the tool."
         )
     why = {
         "failed": "this agent did not pass the hearing check",
@@ -314,7 +315,8 @@ def sound_line(hearing):
         "not_taken": "no hearing check was taken for this analysis",
     }[st]
     return (
-        f"Not judged: {why}, so nothing here says what the sound is (music, tone of voice, sound effects). "
+        f"Not judged: {why}. Nothing in this file that says what the sound is was heard: `build` lists each such "
+        "statement it finds (music, a song, a sound effect, a tone of voice and like words) as an open check. "
         "Times and loudness are measured by the tool."
     )
 
