@@ -9,7 +9,12 @@ sound. The digits are never written to a file: the record keeps only a salted, d
 (PBKDF2), so neither reading the folder nor trying every answer against the hash gives them cheaply. What
 does give them is measuring the file itself (decoding it, running a speech recognizer on it); the
 instructions forbid that, since a check passed that way would make every later description of the sound
-an invention.
+an invention. The check protects against an agent that cannot hear inventing what the sound is; it does not
+protect against someone who deliberately forges the record, which is a file in the scan folder.
+
+The record and the cut files belong to the scan they were made for: `scan` removes the folders that hold
+them (`hearing/`, `listen/`) whenever it writes a scan folder, so a pass or a clip of an earlier video in
+the same folder cannot outlive it.
 
 After a pass, `listen` cuts the video's sound around each measured sound event, and the whole track when it
 is short, into files the agent opens; `build` then takes the agent's statements of what the sound is (the
@@ -24,6 +29,7 @@ import secrets
 import shlex
 import shutil
 import subprocess
+import unicodedata
 
 from . import util
 from .media import run
@@ -31,8 +37,10 @@ from .scandir import load_dir
 from .util import die, fmt_t, read_json, write_json
 
 HEAR_DIGITS = 6  # one chance in a million of guessing them; easy to hear for a model that hears speech
-# PBKDF2-HMAC-SHA256 rounds for the stored hash: 0.35 s per answer tried on an Apple M6, so
-# trying all million answers takes about four days of one core, while marking one answer takes no time to notice
+# PBKDF2-HMAC-SHA256 rounds for the stored hash. Measured on an Apple M6, one core: 0.38 s per answer tried
+# with OpenSSL 3 (Python 3.14), 0.61 s with the LibreSSL of macOS's own Python 3.9. Trying every answer takes
+# a million times as long as marking one: at those speeds 4 to 7 days of one core, about half a day of 12
+# cores. Marking one answer stays short enough not to notice.
 HEAR_ROUNDS = 3_000_000
 # speech synthesizers the check can use, in the order tried: macOS has `say`; Linux has espeak-ng or espeak
 # when installed (most package managers carry espeak-ng). Each reads the text on standard input, so the
@@ -59,26 +67,84 @@ def hearing_dir(d):
     return os.path.join(d, "hearing")
 
 
+def listen_dir(d):
+    return os.path.join(d, "listen")
+
+
+def forget(d):
+    """Remove the hearing record and the cut sound files of a scan folder: `scan` calls it whenever it
+    writes the folder, since both belong to the video they were made for."""
+    for p in (hearing_dir(d), listen_dir(d)):
+        shutil.rmtree(p, ignore_errors=True)
+
+
 def record_path(d):
     return os.path.join(hearing_dir(d), "hearing.json")
 
 
+def _bad_record(d, what):
+    die(
+        f"the hearing record {record_path(d)} is not one the tool wrote ({what}); remove the folder "
+        f"{hearing_dir(d)} and take the check again"
+    )
+
+
 def read_record(d):
     p = record_path(d)
-    return read_json(p, "hearing record") if os.path.exists(p) else {"checks": []}
+    rec = read_json(p, "hearing record") if os.path.exists(p) else {"checks": []}
+    if not (isinstance(rec, dict) and isinstance(rec.get("checks"), list)):
+        _bad_record(d, "no list of checks")
+    if not all(isinstance(c, dict) for c in rec["checks"]):
+        _bad_record(d, "a check that is not a record")
+    return rec
+
+
+HEX = re.compile(r"[0-9a-f]+")
+
+
+def _complete(d, n, c):
+    """Whether check number n (from 1) is a whole record of a check the tool made in this folder: its sound
+    file is there under the name the tool gave it, and its salt, hash, rounds and digit count are those the
+    tool writes. A pass counts only then."""
+    salt, digest = c.get("salt"), c.get("digest")
+    return (
+        c.get("file") == f"check_{n}.wav"
+        and os.path.isfile(os.path.join(hearing_dir(d), c["file"]))
+        and isinstance(salt, str)
+        and len(salt) == 32
+        and bool(HEX.fullmatch(salt))
+        and isinstance(digest, str)
+        and len(digest) == 64
+        and bool(HEX.fullmatch(digest))
+        and c.get("rounds") == HEAR_ROUNDS
+        and c.get("digits") == HEAR_DIGITS
+        and isinstance(c.get("made"), str)
+        and isinstance(c.get("answered"), str)
+    )
 
 
 def hearing_state(d):
     """What the hearing record says for this analysis: passed, failed, cannot_hear or not_taken, and the
-    checks taken. The last check answered decides; one made but not answered counts for nothing."""
+    checks taken. The last check answered decides; one made but not answered counts for nothing, and so does
+    a pass whose record is not whole (see _complete)."""
     rec = read_record(d)
-    done = [c for c in rec.get("checks", []) if c.get("outcome")]
+    done = [
+        c
+        for n, c in enumerate(rec["checks"], 1)
+        if c.get("outcome") in ("failed", "cannot_hear") or (c.get("outcome") == "passed" and _complete(d, n, c))
+    ]
     state = done[-1]["outcome"] if done else "not_taken"
     return {
         "state": state,
         "checks_answered": len(done),
         "checks_passed": sum(1 for c in done if c["outcome"] == "passed"),
     }
+
+
+def answer_digits(answer):
+    """The digits of an answer, in order, as ASCII: any decimal digit counts (full-width digits typed in a
+    Chinese or Japanese reply, Arabic-Indic ones), every other character is ignored."""
+    return "".join(str(unicodedata.decimal(ch)) for ch in answer if unicodedata.decimal(ch, None) is not None)
 
 
 def _digest(answer, salt, rounds):
@@ -98,6 +164,7 @@ def synthesize(text, out_wav, tmp_wav):
             f"({', '.join(SYNTHESIZERS)}); without the check, what the sound is stays not judged"
         )
     name, path = syn
+    os.makedirs(os.path.dirname(out_wav), exist_ok=True)  # only now: without a synthesizer nothing is written
     if name == "say":
         cmd = [path, "--file-format=WAVE", "--data-format=LEI16@22050", "-o", tmp_wav, "-f", "-"]
     else:
@@ -124,15 +191,15 @@ def cmd_hear_check(a):
     idx, _, _ = load_dir(d)
     if not idx["facts"].get("has_audio"):
         die("the video has no audio track: there is nothing to hear, and no hearing check is needed")
-    os.makedirs(hearing_dir(d), exist_ok=True)
     rec = read_record(d)
-    checks = rec.setdefault("checks", [])
+    checks = rec["checks"]
     waiting = checks[-1] if checks and not checks[-1].get("outcome") else None
     if a.cannot_hear:
         c = waiting or {"file": None, "made": None}
         if not waiting:
             checks.append(c)
         c.update(outcome="cannot_hear", answered=_now())
+        os.makedirs(hearing_dir(d), exist_ok=True)
         write_json(record_path(d), rec, indent=1)
         print(
             "hear-check: recorded that this agent cannot open sound. The riffsheet says that what the sound is "
@@ -142,7 +209,14 @@ def cmd_hear_check(a):
     if a.answer is not None:
         if not waiting:
             die(f"no hearing check is waiting for an answer: make one with {_cmd()} hear-check {_q(d)}")
-        given = "".join(re.findall(r"\d", a.answer))
+        if not (
+            isinstance(waiting.get("salt"), str)
+            and HEX.fullmatch(waiting["salt"])
+            and isinstance(waiting.get("digest"), str)
+            and waiting.get("rounds") == HEAR_ROUNDS
+        ):
+            _bad_record(d, "the waiting check has no salt, hash or rounds")
+        given = answer_digits(a.answer)
         if not given:
             die("the answer holds no digits: write the digits you heard, in order (nothing was recorded)")
         passed = len(given) == HEAR_DIGITS and hmac.compare_digest(
@@ -228,13 +302,27 @@ def listen_windows(idx):
 
 
 def listen_path(d):
-    return os.path.join(d, "listen", "listen.json")
+    return os.path.join(listen_dir(d), "listen.json")
 
 
 def listen_clips(d):
     """name -> [start, end] of the sound files `listen` cut in this scan folder."""
     p = listen_path(d)
-    return {c["name"]: c["span"] for c in read_json(p, "listen record")["clips"]} if os.path.exists(p) else {}
+    if not os.path.exists(p):
+        return {}
+    rec = read_json(p, "listen record")
+    clips = rec.get("clips") if isinstance(rec, dict) else None
+    ok = isinstance(clips, list) and all(
+        isinstance(c, dict)
+        and isinstance(c.get("name"), str)
+        and isinstance(c.get("span"), list)
+        and len(c["span"]) == 2
+        and all(isinstance(v, (int, float)) and not isinstance(v, bool) for v in c["span"])
+        for c in clips
+    )
+    if not ok:
+        die(f"the listen record {p} is not one the tool wrote; remove the folder {listen_dir(d)} and run listen again")
+    return {c["name"]: c["span"] for c in clips}
 
 
 def cmd_listen(a):
@@ -261,7 +349,7 @@ def cmd_listen(a):
         wins = [(f"sound_{a_:05.2f}_{b_:05.2f}", round(a_, 3), round(b_, 3))]
     else:
         wins = listen_windows(idx)
-    ld = os.path.join(d, "listen")
+    ld = listen_dir(d)
     os.makedirs(ld, exist_ok=True)
     known = {k: {"name": k, "span": v} for k, v in listen_clips(d).items()}
     print(f"listen: {len(wins)} sound file(s) in {ld} (mono {LISTEN_RATE} Hz WAV); open each as sound")

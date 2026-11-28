@@ -290,6 +290,17 @@ class OtherMeans(clips.MainClipCase):
         self.assertIn("## What the tool lacked here (recorded by the agent)\n\n- no command measures pitch", md)
         r, _ = self.build("bad other means", edit=lambda j: j.update(own_means=[{"fact": "x"}]))
         self.assertIn("own_means[0]: give each as", r.stdout)
+        # wrong types are problems listed by build, never a traceback or a list of characters
+        for change, needle in (
+            ({"own_means": "a spectrum"}, "own_means: give a list"),
+            ({"own_means": [{"fact": {"a": 1}, "used": "x"}]}, "own_means[0]: give each as"),
+            ({"own_means": [{"fact": "x", "used": "y", "time": [{"a": 1}, 2]}]}, "own_means[0]: 'time' is"),
+            ({"tool_gaps": "no pitch command"}, "tool_gaps: give a list"),
+        ):
+            r, out = self.build("bad other means", edit=lambda j, c=change: j.update(c))
+            ok(self, r)
+            self.assertIn(needle, r.stdout)
+            self.assertNotIn("\n- n\n", read(os.path.join(out, "riffsheet.md")))
 
 
 class Words(unittest.TestCase):

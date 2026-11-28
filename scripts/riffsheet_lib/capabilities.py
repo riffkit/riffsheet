@@ -285,7 +285,9 @@ def hearing_status():
         "facts": facts,
         "adds": HEARING_ADDS,
         "without": HEARING_LACKS,
-        "run_time": "making the check's sound takes about a second; marking an answer about a third of a second",
+        "run_time": "where measured (Apple M6, macOS `say`), making a check took 1.0 to 1.4 s and marking an "
+        "answer 0.38 to 0.61 s, one slow hash whose speed depends on the machine and on the Python's OpenSSL "
+        "or LibreSSL",
         "cost": [],
         "prepare": [],
         "run_with": None,

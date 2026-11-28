@@ -20,6 +20,7 @@ from .audio import (
 from .capabilities import STAGE_RECORDS, stage_lines, stages_of, untested_lines
 from .constants import LONG_VIDEO_S, REGION_SETTLE_MIN, STILL_LOCKED, STILL_MOVING
 from .elements import element_candidates, element_line, element_record, find_panes
+from .hearing import forget
 from .media import extract_cells, probe, run, run_timeout_for, set_timeout
 from .picture import (
     between_frames,
@@ -396,6 +397,7 @@ def cmd_scan(a):
         "overview_step_s": step,
         "_words": words,
     }
+    forget(out)  # a hearing record and cut sound files belong to the video they were made for
     write_json(os.path.join(out, "frames.json"), {"pts": pts})
     index["scan_seconds"] = round(time.time() - t0, 2)
     write_json(os.path.join(out, "index.json"), index, indent=1, ensure_ascii=False)

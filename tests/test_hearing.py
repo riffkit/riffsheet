@@ -14,7 +14,7 @@ from tests import clips
 from tests.clips import CLIPS, cs, ok, read, refused
 
 sys.path.insert(0, os.path.join(clips.ROOT, "scripts"))
-from riffsheet_lib import hearing  # noqa: E402
+from riffsheet_lib import capabilities, hearing  # noqa: E402
 
 
 def setUpModule():
@@ -23,6 +23,7 @@ def setUpModule():
 
 def fake_voice(text, out_wav, tmp_wav):
     """Stands in for the speech synthesizer: a tone as long as the digits would take to say."""
+    os.makedirs(os.path.dirname(out_wav), exist_ok=True)
     clips.ff("-f", "lavfi", "-i", f"sine=frequency=440:duration={len(text) * 0.2}", "-ac", "1", "-ar", "16000", out_wav)
     return "a test voice"
 
@@ -91,6 +92,77 @@ class Check(unittest.TestCase):
             self.assertEqual((w.getnchannels(), w.getframerate()), (1, hearing.LISTEN_RATE))
             self.assertAlmostEqual(w.getnframes() / w.getframerate(), 6.0, delta=0.05)
 
+    def test_any_decimal_digits_count(self):
+        """An agent replying in Chinese types full-width digits; the answer is marked, not a traceback."""
+        self.assertEqual(hearing.answer_digits("３０５ ٩١8"), "305918")
+        d = copy_scan("full width")
+        call(hearing.cmd_hear_check, d)
+        code, out, err = call(hearing.cmd_hear_check, d, answer="３０５９１８")
+        self.assertEqual(code, 0, err)
+        self.assertIn("PASSED", out)
+
+    def test_a_pass_counts_only_from_a_whole_record(self):
+        """Only what the tool writes makes a pass: a hand-written or damaged record does not (the check is
+        against an agent mistaken about itself, not against forging the record)."""
+        d = copy_scan("forged")
+        os.makedirs(os.path.join(d, "hearing"))
+        rec = os.path.join(d, "hearing", "hearing.json")
+
+        def write(obj):
+            with open(rec, "w") as f:
+                json.dump(obj, f)
+
+        write({"checks": [{"outcome": "passed"}]})
+        self.assertEqual(hearing.hearing_state(d)["state"], "not_taken")
+        self.assertEqual(call(hearing.cmd_listen, d)[0], 1)
+        os.remove(rec)
+        call(hearing.cmd_hear_check, d)
+        call(hearing.cmd_hear_check, d, answer="305918")
+        self.assertEqual(hearing.hearing_state(d)["state"], "passed")
+        good = json.loads(read(rec))
+        for key, value in (("rounds", 1), ("salt", "x"), ("digest", None), ("file", "check_2.wav"), ("digits", 4)):
+            write({"checks": [dict(good["checks"][0], **{key: value})]})
+            self.assertEqual(hearing.hearing_state(d)["state"], "not_taken", key)
+        write(good)
+        os.rename(os.path.join(d, "hearing", "check_1.wav"), os.path.join(d, "hearing", "moved.wav"))
+        self.assertEqual(hearing.hearing_state(d)["state"], "not_taken")
+        # a record that is not a list of checks, or a waiting check without its hash: one line, no traceback
+        for bad in ({"checks": ["passed"]}, {"checks": {}}, [1]):
+            write(bad)
+            refused(self, cs("listen", d), "is not one the tool wrote")
+        write({"checks": [{"file": "check_1.wav"}]})
+        refused(self, cs("hear-check", d, "--answer", "305918"), "is not one the tool wrote")
+
+    def test_a_damaged_listen_record_is_one_line(self):
+        d = copy_scan("damaged listen")
+        os.makedirs(os.path.join(d, "listen"))
+        for bad in ({"clips": [{"name": ["whole"], "span": [0, 6]}]}, {"clips": [{"name": "whole", "span": 6}]}):
+            with open(os.path.join(d, "listen", "listen.json"), "w") as f:
+                json.dump(bad, f)
+            with self.assertRaises(SystemExit), contextlib.redirect_stderr(io.StringIO()):
+                hearing.listen_clips(d)
+
+    def test_a_new_scan_forgets_the_pass_and_the_clips(self):
+        """A pass and clips left in a folder belong to the video they were made for: scanning another video
+        into the folder removes them (the reviewer's case: a 12 s video's clip, then an 8 s video)."""
+        d = copy_scan("rescanned")
+        call(hearing.cmd_hear_check, d)
+        call(hearing.cmd_hear_check, d, answer="305918")
+        self.assertEqual(call(hearing.cmd_listen, d, start=4.0, end=6.0)[0], 0)
+        other = os.path.join(clips.WORK, "other video.mp4")
+        clips.ff(
+            "-f", "lavfi", "-i", "testsrc2=s=320x240:r=30:d=3", "-f", "lavfi", "-i", "sine=f=220:d=3",
+            "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest", other,
+        )  # fmt: skip
+        ok(self, cs("scan", other, "--out", d))
+        self.assertFalse(os.path.exists(os.path.join(d, "hearing")))
+        self.assertFalse(os.path.exists(os.path.join(d, "listen")))
+        self.assertEqual(hearing.hearing_state(d)["state"], "not_taken")
+        self.assertEqual(hearing.listen_clips(d), {})
+        code, _, err = call(hearing.cmd_listen, d)
+        self.assertEqual(code, 1)
+        self.assertIn("no hearing check was answered", err)
+
     def test_cannot_hear(self):
         d = copy_scan("cannot")
         call(hearing.cmd_hear_check, d)
@@ -124,16 +196,17 @@ class Build(clips.MainClipCase):
         self.assertIn("NOT HEARD (1)", r.stdout)
         self.assertIn("no hearing check was answered", r.stdout)
         self.assertFalse(os.path.exists(os.path.join(out, "riffsheet.md")))
-        saved = hearing.synthesize, hearing.new_digits, hearing.HEAR_ROUNDS
-        hearing.synthesize, hearing.new_digits, hearing.HEAR_ROUNDS = fake_voice, lambda: "111111", 1000
+        # the real number of rounds: `build` runs in a process of its own, and a pass counts only with them
+        saved = hearing.synthesize, hearing.new_digits
+        hearing.synthesize, hearing.new_digits = fake_voice, lambda: "111111"
         try:
             call(hearing.cmd_hear_check, d)
             call(hearing.cmd_hear_check, d, answer="111111")
         finally:
-            hearing.synthesize, hearing.new_digits, hearing.HEAR_ROUNDS = saved
+            hearing.synthesize, hearing.new_digits = saved
         self.assertEqual(call(hearing.cmd_listen, d)[0], 0)
         r, out = self.heard_build(d, "heard outside", [dict(tone[0], clip="sound_99")])
-        self.assertIn("clip 'sound_99' is not a sound file `listen` cut", r.stdout)
+        self.assertIn('clip "sound_99" is not a sound file `listen` cut', r.stdout)
         r, out = self.heard_build(d, "heard", tone)
         ok(self, r)
         self.assertIn("CHECKS: all passed", r.stdout)
@@ -155,6 +228,53 @@ class Build(clips.MainClipCase):
         md = read(os.path.join(out, "riffsheet.md"))
         self.assertIn("**Sound.** Heard by the agent, which passed the hearing check", md)
         self.assertIn("**Heard by the agent.** 00:04.0–00:06.0, effect: a steady electronic tone.", md)
+
+    def passed_copy(self, name):
+        d = os.path.join(clips.WORK, "hearing build " + name)
+        shutil.copytree(self.d, d)
+        # the real number of rounds: `build` runs in a process of its own, and a pass counts only with them
+        saved = hearing.synthesize, hearing.new_digits
+        hearing.synthesize, hearing.new_digits = fake_voice, lambda: "111111"
+        try:
+            call(hearing.cmd_hear_check, d)
+            call(hearing.cmd_hear_check, d, answer="111111")
+            self.assertEqual(call(hearing.cmd_listen, d)[0], 0)
+        finally:
+            hearing.synthesize, hearing.new_digits = saved
+        return d
+
+    def test_a_heard_time_lies_inside_this_video(self):
+        """Even a listen record naming a window past the video's end (as an earlier, longer video's did)
+        cannot put a heard statement outside this 6 s video."""
+        d = self.passed_copy("past the end")
+        p = os.path.join(d, "listen", "listen.json")
+        rec = json.loads(read(p))
+        rec["clips"].append({"name": "sound_09.00_11.50", "span": [9.0, 11.5]})
+        with open(p, "w") as f:
+            json.dump(rec, f)
+        r, out = self.heard_build(
+            d, "heard past the end", [{"clip": "sound_09.00_11.50", "about": "music", "text": "a song"}]
+        )
+        ok(self, r)
+        self.assertIn("lies outside this video (0–6.0 s)", r.stdout)
+        self.assertEqual(json.loads(read(os.path.join(out, "riffsheet.json")))["audio"]["heard"], [])
+
+    def test_malformed_heard_statements_are_problems(self):
+        d = self.passed_copy("malformed")
+        tone = {"clip": "whole", "about": "effect", "text": "a steady electronic tone"}
+        for heard, needle in (
+            ([dict(tone, time=5)], "'time' is [start, end]"),
+            ([dict(tone, time=[{"a": 1}, 2])], "'time' is [start, end]"),
+            ([dict(tone, clip=["whole"])], 'clip ["whole"] is not a sound file'),
+            ([dict(tone, about=["music"])], "'about' is one of"),
+            ([dict(tone, text=["a tone"])], "give each as"),
+            ("a steady tone", "heard: give a list"),
+            ({"whole": "a tone"}, "heard: give a list"),
+        ):
+            r, out = self.heard_build(d, "heard malformed", heard)
+            ok(self, r)
+            self.assertIn(needle, r.stdout, heard)
+            self.assertEqual(json.loads(read(os.path.join(out, "riffsheet.json")))["audio"]["heard"], [])
 
     def test_not_judged_says_why(self):
         r, out = clips.build_judgment(self.d, self.ids, "no check")
@@ -180,6 +300,16 @@ class RealVoice(unittest.TestCase):
 
 
 class CheckReport(unittest.TestCase):
+    def test_hash_times_are_the_measured_ones(self):
+        """How long marking an answer and trying every answer take: only what was measured, on both
+        interpreters, with the machine named (no rounded figure that a slower machine would make false)."""
+        hc = capabilities.hearing_status()
+        self.assertIn("marking an answer 0.38 to 0.61 s", hc["run_time"])
+        tool = read(os.path.join(clips.ROOT, "references", "TOOL.md"))
+        self.assertIn("0.38 s with OpenSSL 3 (Python 3.14) and 0.61 s with the LibreSSL", tool)
+        self.assertIn("4 to 7 days of one such core", tool)
+        self.assertNotIn("trying all million takes days", tool)
+
     def test_check_says_whether_the_hearing_check_can_be_made(self):
         R = json.loads(cs("check", CLIPS["split"], "--json").stdout)
         hc = next(c for c in R["capabilities"] if c["id"] == "hearing_check")

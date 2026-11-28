@@ -266,7 +266,7 @@ class BuildState:
         self.psegs, self.prose = [], ""
         self.slots = []
         self.meta = None
-        self.own_means = []
+        self.own_means, self.tool_gaps = [], []
         self.hearing, self.heard, self.unheard = None, [], []  # unheard: statements of sound without a pass
 
     def add(self, e):
@@ -844,20 +844,39 @@ def check_no_speech_claims(s):
             )
 
 
+def time_pair(tm):
+    """Whether a judgment's 'time' is [start, end], each seconds, Sn, Sn.end or end."""
+    return isinstance(tm, list) and len(tm) == 2 and all(isinstance(v, (str, int, float)) for v in tm)
+
+
 def build_own_means(s):
     """Facts the agent established by means the tool does not provide (another program, a service, a source
     of its own), each with what it used: they go out marked as such, never as measured or seen."""
     s.own_means = []
-    for k, x in enumerate(s.J.get("own_means") or []):
-        if not (isinstance(x, dict) and str(x.get("fact") or "").strip() and str(x.get("used") or "").strip()):
+    given = s.J.get("own_means") or []
+    if not isinstance(given, list):
+        s.problems.append('own_means: give a list, [{"fact": "...", "used": "what you used"}, ...]')
+        given = []
+    for k, x in enumerate(given):
+        if not (
+            isinstance(x, dict)
+            and isinstance(x.get("fact"), str)
+            and x["fact"].strip()
+            and isinstance(x.get("used"), str)
+            and x["used"].strip()
+        ):
             s.problems.append(f'own_means[{k}]: give each as {{"fact": "...", "used": "what you used"}}')
             continue
-        e = {"fact": str(x["fact"]).strip(), "used": str(x["used"]).strip()}
-        if x.get("time") is not None and not (isinstance(x["time"], list) and len(x["time"]) == 2):
+        e = {"fact": x["fact"].strip(), "used": x["used"].strip()}
+        if x.get("time") is not None and not time_pair(x["time"]):
             s.problems.append(f"own_means[{k}]: 'time' is [start, end]")
         elif x.get("time") is not None:
             e["time_range"] = [round(s.jj.t(v, f"own_means[{k}]"), 3) for v in x["time"]]
         s.own_means.append(e)
+    gaps = s.J.get("tool_gaps")
+    if gaps is not None and not isinstance(gaps, list):
+        s.problems.append('tool_gaps: give a list, ["what the tool lacked, and what you did instead", ...]')
+    s.tool_gaps = gaps if isinstance(gaps, list) else []
 
 
 def build_heard(s):
@@ -868,6 +887,9 @@ def build_heard(s):
     else:
         s.hearing = hearing_state(s.jj.d)
     given = s.J.get("heard") or []
+    if not isinstance(given, list):
+        s.problems.append('heard: give a list of statements, [{"clip": NAME, "about": ..., "text": "..."}, ...]')
+        return
     if not given:
         return
     if s.hearing["state"] != "passed":
@@ -883,30 +905,40 @@ def build_heard(s):
         return
     clips = listen_clips(s.jj.d)
     for k, x in enumerate(given):
-        if not isinstance(x, dict) or not str(x.get("text") or "").strip():
+        if not (isinstance(x, dict) and isinstance(x.get("text"), str) and x["text"].strip()):
             s.problems.append(f'heard[{k}]: give each as {{"clip": NAME, "about": ..., "text": "..."}}')
             continue
-        span = clips.get(x.get("clip"))
+        clip = x.get("clip")
+        span = clips.get(clip) if isinstance(clip, str) else None
         if not span:
             s.problems.append(
-                f"heard[{k}]: clip '{x.get('clip')}' is not a sound file `listen` cut in this scan folder "
-                f"({', '.join(sorted(clips)) or 'none yet: run listen'})"
+                f"heard[{k}]: clip {json.dumps(clip, ensure_ascii=False)} is not a sound file `listen` cut in this "
+                f"scan folder ({', '.join(sorted(clips)) or 'none yet: run listen'})"
             )
             continue
-        if x.get("about") not in HEARD_ABOUT:
+        if not (isinstance(x.get("about"), str) and x["about"] in HEARD_ABOUT):
             s.problems.append(f"heard[{k}]: 'about' is one of {', '.join(HEARD_ABOUT)}")
             continue
-        tr = [round(s.jj.t(v, f"heard[{k}]"), 3) for v in x.get("time") or span]
-        if len(tr) != 2 or tr[0] < span[0] - EDGE_TOL_S or tr[1] > span[1] + EDGE_TOL_S or tr[1] <= tr[0]:
+        tm = x.get("time")
+        if tm is not None and not time_pair(tm):
+            s.problems.append(f"heard[{k}]: 'time' is [start, end] (seconds, Sn, Sn.end or end)")
+            continue
+        tr = [round(s.jj.t(v, f"heard[{k}]"), 3) for v in tm or span]
+        if tr[0] < span[0] - EDGE_TOL_S or tr[1] > span[1] + EDGE_TOL_S or tr[1] <= tr[0]:
             s.problems.append(f"heard[{k}]: time {tr} lies outside the clip it was heard in ({span[0]}–{span[1]} s)")
+            continue
+        # kept inside the clip and inside this video
+        tr = [max(tr[0], span[0], 0.0), min(tr[1], span[1], s.jj.dur)]
+        if tr[1] <= tr[0]:
+            s.problems.append(f"heard[{k}]: time {tr} lies outside this video (0–{s.jj.dur} s)")
             continue
         s.heard.append(
             {
                 "id": f"h{len(s.heard) + 1}",
                 "time_range": tr,
                 "about": x["about"],
-                "text": str(x["text"]).strip(),
-                "clip": x["clip"],
+                "text": x["text"].strip(),
+                "clip": clip,
                 "_src": {"text": "heard"},
             }
         )
@@ -1287,7 +1319,7 @@ def analysis_of(s, d, out_dir):
             "sound_at_picture": sound_at_picture_doc(s),
             "dropped_as_music": music_words(s),
             "cannot_judge_locally": J.get("cannot_judge", []),
-            "tool_gaps": J.get("tool_gaps", []),
+            "tool_gaps": s.tool_gaps,
             "own_means": s.own_means,
             "followups": [
                 {k: f.get(k) for k in ("cmd", "json", "window", "box", "frames")} for f in idx.get("followups", [])
