@@ -14,7 +14,7 @@
 <p align="center"><picture><source media="(prefers-reduced-motion: reduce)" srcset="docs/media/hero_still.png"><img src="docs/media/hero.gif" width="880" alt="我们自己的一条短视频在播放，旁边是它的 riffsheet 随播放逐步填出：测得的剪辑点、字幕和声音，以及 agent 对每个镜头的判断。"></picture></p>
 <p align="center"><sub>我们自己的一条视频，由 riffsheet 拆解。完整结果见 <a href="examples/red-carpet/">examples/red-carpet</a>。</sub></p>
 
-> 本页译自 [README.md](README.md)；两者不一致时以英文版为准。
+> 本页译自 [README.md](README.md)；两者不一致时以英文版为准。仓库里的其他文档（评测、示例说明、方法和工具手册、更新记录）目前只有英文，riffsheet 生成的结果也是英文的。
 
 ## 安装
 
@@ -23,7 +23,7 @@
 **1. 直接告诉你的 agent**（Claude Code、Codex，或任何能执行命令的 agent）：
 
 ```text
-Install the riffsheet skill from https://github.com/riffkit/riffsheet, then break down ~/Downloads/clip.mp4
+安装 https://github.com/riffkit/riffsheet 这个 riffsheet 技能，然后逐镜头拆解 ~/Downloads/clip.mp4
 ```
 
 **2. 或者用 git 放进 agent 的技能文件夹：**
@@ -39,15 +39,15 @@ git clone https://github.com/riffkit/riffsheet ~/.agents/skills/riffsheet   # Co
 
 ## 试一试
 
-把一个视频文件交给你的 agent，用你自己的话提要求（中文也可以）：
+把一个视频文件交给你的 agent，用你自己的话提要求：
 
 ```text
-Break down this video shot by shot: ~/Downloads/ad.mp4
-Why does this TikTok work? I want to make my own version.
-Analyze this Reel and list every caption with its timing.
+逐镜头拆解这条视频：~/Downloads/ad.mp4
+这条 TikTok 为什么能火？我想做一条自己的版本。
+分析这条 Reel，把每条字幕和它出现的时间列出来。
 ```
 
-大约 4 到 8 分钟后，你会得到供人阅读的 `riffsheet.md`，以及包含全部数值的 `riffsheet.json`。下面是其中一个示例的开头，一条 8 秒、用西班牙语说话的视频（结果原文是英文）：
+大约 4 到 8 分钟后，你会得到供人阅读的 `riffsheet.md`，以及包含全部数值的 `riffsheet.json`。下面是其中一个示例的开头，一条 8 秒、用西班牙语说话的视频（结果原文是英文）（结果是英文的，以下原样引用）：
 
 > **8.042 s · 4 shots · one picture at a time · spoken on camera (es) · 5 spoken lines**
 >
@@ -115,6 +115,7 @@ agent 遵循的流程见 [`references/METHOD.md`](references/METHOD.md)；每条
 - **抓到每一处剪辑。** 同一机位内的跳切，要在一帧之内有十分之一以上的画面变化、且颜色保持一致才会被找到：在一条 45 秒的口播视频上找到 9 处中的 7 处。更小的跳切会提示 agent 判断，或者找不到；在同一背景上淡入另一套衣服、另一个人或另一个物体检测不到；缓慢的叠化可能漏掉。全部已知局限见 [`references/TOOL.md`](references/TOOL.md)。
 - **处理好长视频。** 它为一分钟以内的片段设计，在 8 到 45 秒的片段上测试过。更长的视频照样能跑，但总览图的间隔会拉大；超过三分钟时，工具会提示哪些步骤会慢。
 - **从链接下载视频。** 请给它视频文件。
+- **用你的语言写结果。** 不管你用什么语言提要求，riffsheet 的内容都是英文的。视频本身可以是任何语言：台词和画面上的字照原样保留。
 
 ## 时间和成本
 

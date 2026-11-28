@@ -113,6 +113,7 @@ Measured again on the code in this release: the cut finder still finds 24 of the
 - **Catch every edit.** A jump cut inside one framing is found when a tenth of the picture or more changes in one frame and keeps its colors: 7 of 9 on a 45-second talking video. Smaller jumps are flagged for the agent or not found; a different outfit, person or object faded in over the same background is not detected; a slow dissolve can be missed. [`references/TOOL.md`](references/TOOL.md) lists every known limit.
 - **Handle long videos well.** It is made for clips up to about a minute and was tested on clips of 8 to 45 seconds. A longer video runs with its overview pictures spaced further apart, and past three minutes the tool warns what will be slow.
 - **Fetch videos from a link.** Give it the file.
+- **Write in your language.** The riffsheet is written in English, whatever language you ask in. The video can be in any language: its spoken lines and on-screen words are kept as they are.
 
 ## Time and cost
 
