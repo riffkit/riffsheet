@@ -258,10 +258,14 @@ def cmd_hear_check(a):
     write_json(record_path(d), rec, indent=1)
     print(
         f"hear-check: {wav}\n"
-        f"  A voice ({name}) says {HEAR_DIGITS} digits, one at a time. Open this file as sound, the way your "
-        f"model takes sound as input, listen, and report the digits in order:\n"
+        f"  A voice ({name}) says {HEAR_DIGITS} digits, one at a time. Open this file the way you open the "
+        f"pictures: with the tool that reads a file into your input, the one that shows you an image. If your "
+        f"model takes sound as input, the file reaches you as sound: listen to it, then answer with the "
+        f"{HEAR_DIGITS} digits you heard, in order, and nothing else:\n"
         f"    {_cmd()} hear-check {_q(d)} --answer DIGITS\n"
-        f"  If you have no way to open a sound file as sound, say so:\n"
+        f"  Answer --cannot-hear only after trying, when opening the file gives you nothing to listen to (an "
+        f"error that the file type is not supported, raw bytes, or a description of the file in place of its "
+        f"sound). Not knowing whether you can hear is no reason to answer it: open the file first.\n"
         f"    {_cmd()} hear-check {_q(d)} --cannot-hear\n"
         f"  Do not work the digits out by measuring the file (decoding it, a speech recognizer, a script, a "
         f"waveform or spectrum): a check passed that way would make every later description of the sound an "

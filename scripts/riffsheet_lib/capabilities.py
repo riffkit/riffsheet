@@ -220,6 +220,13 @@ def speech_status():
                 "measured": "faster-whisper 1.2.1, Python 3.9, macOS on Apple silicon; other systems differ somewhat",
             }
         )
+        if importlib.util.find_spec("ensurepip") is None:
+            facts.append(
+                "this Python cannot make a virtual environment, which the commands below do: its ensurepip module "
+                "is missing (Debian and Ubuntu leave it out of the system Python and ship it as the system package "
+                "python3-venv). Installing a system package changes the machine: it needs administrator rights "
+                "and the person's yes, like any other cost"
+            )
         prepare += [f"{_q(sys.executable)} -m venv {_q(venv)}", f"{_q(vpy)} -m pip install faster-whisper"]
         remove.append(f"rm -rf {_q(venv)}")
     if model:
@@ -275,7 +282,9 @@ def hearing_status():
         f"a speech synthesizer is here to make the check's sound: {syn[0]} at {syn[1]}"
         if syn
         else f"no speech synthesizer is on PATH ({', '.join(SYNTHESIZERS)}), so the check's sound cannot be "
-        f"made here (espeak-ng is in most Linux package managers)",
+        f"made here. macOS has say; on Linux espeak-ng is a system package (on Debian and Ubuntu, espeak-ng). "
+        f"Installing a system package changes the machine: it needs administrator rights and the person's yes, "
+        f"like any other cost",
         "whether this agent can hear is not known here: only the check, taken after `scan`, settles it",
     ]
     return {

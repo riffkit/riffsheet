@@ -29,22 +29,25 @@ jobs:
           - {os: macos-latest, python: "3.13"}
     runs-on: ${{ matrix.os }}
     env:
-      RIFFSHEET_REQUIRE_FFMPEG: "1"  # a missing ffmpeg or filter fails the run instead of skipping every test
+      RIFFSHEET_REQUIRE_FFMPEG: "1"  # a missing ffmpeg, filter or speech synthesizer fails the run instead of skipping tests
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - name: ffmpeg (Linux)
+      - name: ffmpeg and a speech synthesizer (Linux)
         if: runner.os == 'Linux'
-        # the runner's Ubuntu ships ffmpeg 8; the next step prints the version and the tool refuses anything older than 7
+        # the runner's Ubuntu ships ffmpeg 8; the next step prints the version and the tool refuses anything older than 7.
+        # espeak-ng makes the hearing check's sound on Linux (macOS has say), so that path is tested here too
         run: |
           sudo apt-get update
-          sudo apt-get install -y ffmpeg fonts-dejavu-core
+          sudo apt-get install -y ffmpeg fonts-dejavu-core espeak-ng
       - name: ffmpeg (macOS)
         if: runner.os == 'macOS'
         run: brew install ffmpeg
       - run: ffmpeg -version | head -1
+      - name: speech synthesizer
+        run: command -v say || espeak-ng --version
       - run: python -I scripts/riffsheet.py --version
       - name: tests
         run: |

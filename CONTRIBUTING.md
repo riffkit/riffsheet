@@ -10,7 +10,7 @@ You need Python 3.9 or newer and ffmpeg 7 or newer built with libx264, freetype 
 RIFFSHEET_REQUIRE_FFMPEG=1 python3 -B -m unittest
 ```
 
-`RIFFSHEET_REQUIRE_FFMPEG=1` turns a missing ffmpeg or filter into a failure; without it every test that needs ffmpeg is skipped and the run still says OK. The suite takes a minute or two. Lint and formatting use ruff (`ruff check scripts tests` and `ruff format --check scripts tests`; settings in `pyproject.toml`).
+`RIFFSHEET_REQUIRE_FFMPEG=1` turns a missing ffmpeg or filter, or a missing speech synthesizer (`say` on macOS, `espeak-ng` on Linux, for the hearing check), into a failure; without it every test that needs one is skipped and the run still says OK. The suite takes a minute or two. Lint and formatting use ruff (`ruff check scripts tests` and `ruff format --check scripts tests`; settings in `pyproject.toml`).
 
 ## Two rules
 

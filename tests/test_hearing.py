@@ -63,6 +63,10 @@ class Check(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn("check_1.wav", out)
         self.assertIn("Do not work the digits out by measuring the file", out)
+        # how to open it as sound, and what to answer, with no room to answer "cannot hear" untried
+        self.assertIn("Open this file the way you open the pictures", out)
+        self.assertIn("answer with the 6 digits you heard, in order, and nothing else", out)
+        self.assertIn("Answer --cannot-hear only after trying", out)
         for root, _, files in os.walk(d):  # not in any file the tool wrote, as text or as bytes
             for f in files:
                 with open(os.path.join(root, f), "rb") as fh:
@@ -319,8 +323,15 @@ class Build(clips.MainClipCase):
         self.assertIn("**Sound.** Not judged: no hearing check was taken for this analysis", md)
 
 
-@unittest.skipUnless(hearing.synthesizer(), "no speech synthesizer on PATH (say, espeak-ng, espeak)")
 class RealVoice(unittest.TestCase):
+    def setUp(self):
+        # like a missing ffmpeg: skipped on a machine without one, a failure where everything is required
+        if not hearing.synthesizer():
+            why = "no speech synthesizer on PATH (say, espeak-ng, espeak)"
+            if os.environ.get("RIFFSHEET_REQUIRE_FFMPEG"):
+                self.fail(why + ", and RIFFSHEET_REQUIRE_FFMPEG=1 requires every program the tests use")
+            self.skipTest(why)
+
     def test_the_synthesizer_makes_a_check(self):
         d = copy_scan("real voice")
         r = cs("hear-check", d)
@@ -336,6 +347,36 @@ class RealVoice(unittest.TestCase):
 
 
 class CheckReport(unittest.TestCase):
+    def test_instructions(self):
+        """SKILL.md: check covers the hearing check, a system package needs a yes, the need is judged from
+        what pictures can show, and the check says how to open the file and what to answer."""
+        skill = read(os.path.join(clips.ROOT, "SKILL.md"))
+        self.assertIn("and whether the hearing check's sound can be made here", skill)
+        self.assertIn("any system package it needs", skill)
+        self.assertIn("`python3-venv`", skill)
+        self.assertIn("`espeak-ng`", skill)
+        self.assertNotIn("cut to music", skill)  # an agent that only sees pictures cannot tell that
+        self.assertIn("a voice-over cannot be seen", skill)
+        self.assertIn("the way you open the pictures", skill)
+        self.assertIn("Answer `rs hear-check DIR --cannot-hear` only after trying", skill)
+
+    def test_check_says_what_needs_a_system_package(self):
+        """On Debian and Ubuntu, `python3 -m venv` needs python3-venv and the hearing check needs espeak-ng:
+        both are system packages, and check says so (installing one needs the person's yes)."""
+        saved = capabilities.importlib.util.find_spec, capabilities.synthesizer, capabilities._in_venv
+        capabilities.importlib.util.find_spec = lambda name: None
+        capabilities.synthesizer, capabilities._in_venv = (lambda: None), (lambda venv: False)
+        try:
+            sp, hc = capabilities.speech_status(), capabilities.hearing_status()
+        finally:
+            capabilities.importlib.util.find_spec, capabilities.synthesizer, capabilities._in_venv = saved
+        facts = " ".join(sp["facts"])
+        self.assertIn("system package python3-venv", facts)
+        self.assertIn("the person's yes", facts)
+        facts = " ".join(hc["facts"])
+        self.assertIn("espeak-ng is a system package", facts)
+        self.assertIn("the person's yes", facts)
+
     def test_hash_times_are_the_measured_ones(self):
         """How long marking an answer and trying every answer take: only what was measured, on both
         interpreters, with the machine named (no rounded figure that a slower machine would make false)."""
