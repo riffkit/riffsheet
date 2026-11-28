@@ -2,6 +2,14 @@
 
 The tool's version is printed by `python3 -I scripts/riffsheet.py --version`, with the version of the `riffsheet.json` format it writes (`format_version`).
 
+## Unreleased
+
+Packaging and documentation only; the tool is unchanged.
+
+- The plugin has an icon.
+- The example pages link to their pictures, and the tool reference names the overview and event sheet files exactly instead of with a wildcard. Both changes are for the checks a plugin directory runs on documentation that names a bundled image.
+- `EVAL.md` says what 0.2.0 changed: the list of where a value can come from includes heard by the agent and established by the agent's own means, and none of the tests covers what an agent says after passing the hearing check.
+
 ## 0.2.0
 
 The analysis says what this machine could and could not do for it, never drops a stage silently, and marks what came from outside the tool. The tool reports facts and measures; the agent judges what an analysis needs and how to get it; the person agrees to anything that costs them something.
